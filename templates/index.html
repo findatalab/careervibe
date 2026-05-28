@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- HERO -->
+<section class="hero">
+    <div class="hero__container">
+        <div class="hero__text">
+            Позвольте приветствовать вас в кругу тех, кто искренне верит в ваш успех! Примите участие в сообществе семи тысяч с лишним выпускников — Финуниверситета и других почтенных заведений — и воспользуйтесь бесценными советами о карьере от изысканных знатоков из самых именитых компаний:
+        </div>
+        <div class="hero__logos">
+            <span class="hero__logo-item">Яндекс</span>
+            <span class="hero__logo-item">Google</span>
+            <span class="hero__logo-item">Альфа-Банк</span>
+            <span class="hero__logo-item">Сбер</span>
+            <span class="hero__logo-item">1С</span>
+            <span class="hero__logo-item">ITI</span>
+        </div>
+        <div class="hero__buttons">
+            <a href="{{ url_for('login') }}" class="btn-hero-primary">Зарегистрироваться</a>
+            <a href="{{ url_for('mission') }}" class="btn-hero-secondary">Узнать больше</a>
+        </div>
+    </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how">
+    <div class="how__container">
+        <div class="how__title">Как это работает: всегда бесплатно, всегда доступно.</div>
+        <div class="how__cards">
+            <div class="how__card">
+                <div class="how__num">1</div>
+                <div class="how__card-text">Студенты задают любые вопросы о карьере.</div>
+            </div>
+            <div class="how__card">
+                <div class="how__num">2</div>
+                <div class="how__card-text">Вопросы направляются профессионалам.</div>
+            </div>
+            <div class="how__card">
+                <div class="how__num">3</div>
+                <div class="how__card-text">Профессионалы дают ясные и полезные ответы.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- LEARN MORE BANNER -->
+<section class="learn-more">
+    <div class="learn-more__container">
+        <div class="learn-more__text">
+            Узнайте больше об опыте студента, специалиста или преподавателя или <a href="{{ url_for('login') }}">зарегистрируйтесь</a>.
+        </div>
+    </div>
+</section>
+
+<!-- FEED SECTION -->
+<section class="feed-section">
+    <div class="feed__container">
+        <div class="feed-layout">
+            <div class="feed-left">
+                <div class="feed-tabs">
+                    <span class="feed-tab active">Все</span>
+                    <span class="feed-tab">Неотвеченные</span>
+                    <span class="feed-tab">Активные</span>
+                    <span class="feed-sort">Сортировать: <span>новые</span></span>
+                </div>
+
+                <div class="ask-input-row">
+                    <div class="ask-avatar-placeholder">👤</div>
+                    <div class="ask-input-text">Что вы хотите спросить у наших специалистов?</div>
+                    <div class="ask-arrow">→</div>
+                </div>
+
+                <div class="q-card">
+                    <div class="q-card__meta">
+                        <div class="q-card__avatar">А</div>
+                        <div class="q-card__author">Александр <span class="q-card__date">14.04.26</span></div>
+                        <div class="q-card__views">просмотров 5</div>
+                    </div>
+                    <div class="q-card__title">Какой второстепенный курс лучше всего выбрать для специальности Программная инженерия?</div>
+                    <div class="q-card__body">Мой преподаватель ИИ настоятельно рекомендовал менеджмент в качестве дополнительного курса, но мне также рекомендовали «Экономику».</div>
+                    <div class="q-card__tags">
+                        <span class="q-card__tag">искусственный интеллект</span>
+                        <span class="q-card__tag">карьерный рост</span>
+                        <span class="q-card__tag">весна 2026</span>
+                        <span class="q-card__tag">специальность</span>
+                        <span class="q-card__tag">менеджмент</span>
+                        <span class="q-card__tag">экономика</span>
+                        <span class="q-card__tag">IT-технологии</span>
+                        <span class="q-card__tag">Финансовый университет</span>
+                    </div>
+                    <div class="q-card__footer">
+                        <span class="q-card__votes">0 голосов</span>
+                        <span class="q-card__comments">5 комментариев</span>
+                        <span class="q-card__location">Москва</span>
+                    </div>
+                </div>
+
+                <div class="q-card">
+                    <div class="q-card__meta">
+                        <div class="q-card__avatar">Н</div>
+                        <div class="q-card__author">Наталья <span class="q-card__date">15.04.26</span></div>
+                        <div class="q-card__views">просмотров 12</div>
+                    </div>
+                    <div class="q-card__title">Как мне начать общаться в сети, если я собираюсь поступить в университет?</div>
+                    <div class="q-card__body">Я собираюсь заняться бизнес-менеджментом, пытаюсь набраться опыта и подготовиться к будущему, но мне кажется, что многие возможности основаны на связях. Как улучшить связи сейчас и во время учёбы?</div>
+                    <div class="q-card__tags">
+                        <span class="q-card__tag">бизнес-менеджмент</span>
+                        <span class="q-card__tag">карьерный рост</span>
+                        <span class="q-card__tag">весна 2026</span>
+                        <span class="q-card__tag">стажировка</span>
+                        <span class="q-card__tag">связи</span>
+                        <span class="q-card__tag">менеджмент</span>
+                        <span class="q-card__tag">Финансовый университет</span>
+                    </div>
+                    <div class="q-card__footer">
+                        <span class="q-card__votes">3 голоса</span>
+                        <span class="q-card__comments">11 комментариев</span>
+                        <span class="q-card__location">Люберцы</span>
+                    </div>
+                </div>
+
+                <div class="pagination">
+                    <a href="#" class="page-btn">«</a>
+                    <a href="#" class="page-btn">‹</a>
+                    <a href="#" class="page-btn active">1</a>
+                    <a href="#" class="page-btn">2</a>
+                    <a href="#" class="page-btn">3</a>
+                    <span class="page-btn dots">...</span>
+                    <a href="#" class="page-btn">50</a>
+                    <a href="#" class="page-btn">›</a>
+                    <a href="#" class="page-btn">»</a>
+                </div>
+            </div>
+
+            <div class="feed-right">
+                <div class="sidebar-help">
+                    <div class="sidebar-help__avatars">
+                        <div class="sidebar-help__av av1">А</div>
+                        <div class="sidebar-help__av av2">Б</div>
+                        <div class="sidebar-help__av av3">В</div>
+                        <div class="sidebar-help__av av4">Г</div>
+                    </div>
+                    <div class="sidebar-help__text">CareerVibe здесь, чтобы помочь вам достичь ваших целей. Получите ответы на карьерные вопросы от профессионалов.</div>
+                    <a href="#" class="sidebar-help__link">Узнайте, как CareerVibe может вас поддержать</a>
+                </div>
+
+                <div class="sidebar-tags">
+                    <div class="sidebar-tags__title">Популярные хештеги</div>
+                    <div class="tag-item">#бизнес x 157</div>
+                    <div class="tag-item">#иих 867</div>
+                    <div class="tag-item">#поступление x 981</div>
+                    <div class="tag-item">#конкурс x 506</div>
+                    <div class="tag-item">#финуниверситет x 2310</div>
+                    <a href="#" class="sidebar-tags__more">Посмотреть все теги</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-container">
+        <!-- Вход -->
+        <div class="auth-card">
+            <div class="auth-icon">🔐</div>
+            <h2>Вход в аккаунт</h2>
+            <form method="post" action="{{ url_for('login') }}">
+                <input type="hidden" name="action" value="login">
+                <div class="auth-field">
+                    <label>Email</label>
+                    <input type="email" name="email" placeholder="example@mail.ru" required>
+                </div>
+                <div class="auth-field">
+                    <label>Пароль</label>
+                    <input type="password" name="password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="auth-btn auth-btn-primary">Войти</button>
+            </form>
+        </div>
+
+        <!-- Регистрация -->
+        <div class="auth-card">
+            <div class="auth-icon">📝</div>
+            <h2>Регистрация</h2>
+            <form method="post" action="{{ url_for('login') }}">
+                <input type="hidden" name="action" value="register">
+                <div class="auth-field">
+                    <label>Email</label>
+                    <input type="email" name="email" placeholder="example@mail.ru" required>
+                </div>
+                <div class="auth-field">
+                    <label>Пароль</label>
+                    <input type="password" name="password" placeholder="минимум 4 символа" required minlength="4">
+                </div>
+                <div class="auth-field">
+                    <label>Подтверждение пароля</label>
+                    <input type="password" name="confirm_password" placeholder="повторите пароль" required>
+                </div>
+                <button type="submit" class="auth-btn auth-btn-secondary">Зарегистрироваться</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

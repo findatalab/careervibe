@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1295">
+    <title>CareerVibe — карьерный нетворкинг</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="page-container">
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header__burger">
+            <span></span><span></span><span></span>
+        </div>
+        <div class="header__logo">
+            <a href="{{ url_for('index') }}" style="text-decoration: none; color: inherit;">Career<span>Vibe</span>.ru</a>
+        </div>
+        <div class="header__search">
+            <input type="text" placeholder="Поиск">
+            <button>🔍</button>
+        </div>
+        <div class="header__spacer"></div>
+
+        {% if user_email %}
+            <div class="user-info">
+                <div class="user-avatar">{{ user_email[0]|upper }}</div>
+                <span class="user-email">{{ user_email }}</span>
+                <a href="{{ url_for('logout') }}" class="logout-btn">Выйти</a>
+            </div>
+        {% else %}
+            <a href="{{ url_for('login') }}" class="btn-ask">Задать вопрос</a>
+            <a href="{{ url_for('login') }}" class="btn-register-header">Зарегистрироваться</a>
+            <a href="{{ url_for('login') }}" class="btn-login">Войти</a>
+        {% endif %}
+    </header>
+
+    <main>
+        <!-- Контейнер для выезжающих уведомлений -->
+        <div id="toast-container"></div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <script>
+                    window.flashMessages = [
+                        {% for category, message in messages %}
+                            { category: "{{ category }}", message: "{{ message }}" }{{ "," if not loop.last }}
+                        {% endfor %}
+                    ];
+                </script>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <div class="footer__container">
+            <div class="footer__grid">
+                <div class="footer__col">
+                    <div class="footer__col-title">О нас</div>
+                    <a href="#">Миссия</a>
+                    <a href="#">Наше влияние</a>
+                    <a href="#">Команда</a>
+                    <a href="#">Найм</a>
+                    <a href="#">Блог</a>
+                    <a href="#">Контакты</a>
+                    <a href="#">ИИ ассистент</a>
+                </div>
+                <div class="footer__col">
+                    <div class="footer__col-title">Участникам</div>
+                    <a href="#">Для студентов</a>
+                    <a href="#">Для профессионалов</a>
+                    <a href="#">Для учителей</a>
+                    <a href="#">Донат</a>
+                </div>
+                <div class="footer__col">
+                    <div class="footer__col-title">Более</div>
+                    <a href="#">Ресурсы для карьеры</a>
+                    <a href="#">Правила сообщества</a>
+                    <a href="#">Условия использования</a>
+                    <a href="#">Политика конфиденциальности</a>
+                </div>
+                <div class="footer__finuniv">
+                    <div class="finuniv-text">
+                        ФИНАНСОВЫЙ УНИВЕРСИТЕТ<br>
+                        <span>ПРИ ПРАВИТЕЛЬСТВЕ РФ</span>
+                    </div>
+                </div>
+            </div>
+            <div class="footer__year">2026</div>
+        </div>
+    </footer>
+</div>
+
+<script>
+    function showToast(message, type) {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = message;
+
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 10);
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                toast.remove();
+            }, 300);
+        }, 4000);
+    }
+
+    if (window.flashMessages && window.flashMessages.length) {
+        window.flashMessages.forEach(msg => {
+            showToast(msg.message, msg.category);
+        });
+    }
+</script>
+</body>
+</html>
