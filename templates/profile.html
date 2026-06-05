@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">
+        <div class="profile-avatar">
+            {% if user.avatar %}
+                <img src="{{ url_for('static', filename='avatars/' + user.avatar) }}" alt="avatar">
+            {% else %}
+                <div class="avatar-placeholder">{{ (user.nickname or user.email)[0]|upper }}</div>
+            {% endif %}
+        </div>
+        <div class="profile-info">
+            <h1>{{ user.nickname or user.email }}</h1>
+            <p>Email: {{ user.email }}</p>
+            <p>На сайте с: {{ user.created_at[:10] }}</p>
+            {% if user_id == user.id %}
+                <a href="{{ url_for('edit_profile') }}" class="btn-small">Редактировать профиль</a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="profile-tabs">
+        <div class="tab active" data-tab="questions">Вопросы ({{ questions|length }})</div>
+        <div class="tab" data-tab="answers">Ответы ({{ answers|length }})</div>
+    </div>
+    <div id="questions-tab" class="tab-content active">
+        {% for q in questions %}
+            <div class="question-item">
+                <div class="question-stats">{{ q.votes }} голосов · {{ q.answer_count }} ответов · {{ q.views }} просмотров</div>
+                <div class="question-title"><a href="{{ url_for('question_detail', question_id=q.id) }}">{{ q.title }}</a></div>
+                <div class="question-date">{{ q.created_at[:16] }}</div>
+            </div>
+        {% else %}
+            <p>Нет вопросов.</p>
+        {% endfor %}
+    </div>
+    <div id="answers-tab" class="tab-content">
+        {% for a in answers %}
+            <div class="answer-item">
+                <div class="answer-stats">{{ a.votes }} голосов</div>
+                <div><a href="{{ url_for('question_detail', question_id=a.question_id) }}">{{ a.question_title }}</a></div>
+                <div class="answer-preview">{{ a.content[:150] }}{% if a.content|length > 150 %}...{% endif %}</div>
+                <div class="answer-date">{{ a.created_at[:16] }}</div>
+            </div>
+        {% else %}
+            <p>Нет ответов.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            this.classList.add('active');
+            document.getElementById(this.dataset.tab + '-tab').classList.add('active');
+        });
+    });
+</script>
+{% endblock %}

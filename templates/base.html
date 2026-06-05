@@ -2,43 +2,80 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=1295">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>CareerVibe — карьерный нетворкинг</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 <div class="page-container">
-    <!-- HEADER -->
-    <header class="header">
-        <div class="header__burger">
-            <span></span><span></span><span></span>
-        </div>
-        <div class="header__logo">
-            <a href="{{ url_for('index') }}" style="text-decoration: none; color: inherit;">Career<span>Vibe</span>.ru</a>
-        </div>
-        <div class="header__search">
-            <input type="text" placeholder="Поиск">
-            <button>🔍</button>
-        </div>
-        <div class="header__spacer"></div>
-
-        {% if user_email %}
-            <div class="user-info">
-                <div class="user-avatar">{{ user_email[0]|upper }}</div>
-                <span class="user-email">{{ user_email }}</span>
-                <a href="{{ url_for('logout') }}" class="logout-btn">Выйти</a>
+    <!-- ШАПКА (sticky) -->
+    <header class="header sticky-header">
+        <div class="header-inner">
+            <div class="header-left">
+                <!-- Бургер-меню -->
+                <div class="burger-menu" id="burgerBtn">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <div class="logo">
+                    <a href="{{ url_for('index') }}">Career<span>Vibe</span>.ru</a>
+                </div>
             </div>
-        {% else %}
-            <a href="{{ url_for('login') }}" class="btn-ask">Задать вопрос</a>
-            <a href="{{ url_for('login') }}" class="btn-register-header">Зарегистрироваться</a>
-            <a href="{{ url_for('login') }}" class="btn-login">Войти</a>
-        {% endif %}
+            <div class="header-search">
+                <form action="{{ url_for('search') }}" method="get">
+                    <input type="text" name="q" placeholder="Поиск по сайту..." value="{{ request.args.get('q', '') }}">
+                    <button type="submit">🔍</button>
+                </form>
+            </div>
+            <div class="header-right">
+                {% if user_id %}
+                    <div class="user-info">
+                        <a href="{{ url_for('profile', user_id=user_id) }}" class="user-avatar-link">
+                            {% if user_avatar %}
+                                <img src="{{ url_for('static', filename='avatars/' + user_avatar) }}" class="user-avatar-img" alt="avatar">
+                            {% else %}
+                                <div class="user-avatar">{{ (user_nickname or user_email)[0]|upper }}</div>
+                            {% endif %}
+                        </a>
+                        <a href="{{ url_for('profile', user_id=user_id) }}" class="user-name">{{ user_nickname or user_email }}</a>
+                        <a href="{{ url_for('ask_question') }}" class="btn-ask-header">Задать вопрос</a>
+                        <a href="{{ url_for('logout') }}" class="logout-btn">Выйти</a>
+                    </div>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="btn-login-header">Войти</a>
+                    <a href="{{ url_for('login') }}" class="btn-register-header">Регистрация</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Выпадающее меню для бургера -->
+        <div class="burger-menu-dropdown" id="burgerDropdown">
+            <div class="burger-menu-content">
+                <div class="burger-menu-section">
+                    <h4>Навигация</h4>
+                    <a href="{{ url_for('index') }}">Главная</a>
+                    <a href="{{ url_for('mission') }}">О проекте</a>
+                    {% if user_id %}
+                        <a href="{{ url_for('ask_question') }}">Задать вопрос</a>
+                        <a href="{{ url_for('profile', user_id=user_id) }}">Мой профиль</a>
+                        <a href="{{ url_for('logout') }}">Выйти</a>
+                    {% else %}
+                        <a href="{{ url_for('login') }}">Войти / Регистрация</a>
+                    {% endif %}
+                </div>
+                <div class="burger-menu-section">
+                    <h4>Информация</h4>
+                    <a href="#">Помощь</a>
+                    <a href="#">Правила сообщества</a>
+                    <a href="#">Контакты</a>
+                </div>
+            </div>
+        </div>
     </header>
 
     <main>
-        <!-- Контейнер для выезжающих уведомлений -->
         <div id="toast-container"></div>
-
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 <script>
@@ -50,45 +87,44 @@
                 </script>
             {% endif %}
         {% endwith %}
-
         {% block content %}{% endblock %}
     </main>
 
+    <!-- ФУТЕР -->
     <footer class="footer">
-        <div class="footer__container">
-            <div class="footer__grid">
-                <div class="footer__col">
-                    <div class="footer__col-title">О нас</div>
-                    <a href="#">Миссия</a>
-                    <a href="#">Наше влияние</a>
-                    <a href="#">Команда</a>
-                    <a href="#">Найм</a>
-                    <a href="#">Блог</a>
-                    <a href="#">Контакты</a>
-                    <a href="#">ИИ ассистент</a>
-                </div>
-                <div class="footer__col">
-                    <div class="footer__col-title">Участникам</div>
-                    <a href="#">Для студентов</a>
-                    <a href="#">Для профессионалов</a>
-                    <a href="#">Для учителей</a>
-                    <a href="#">Донат</a>
-                </div>
-                <div class="footer__col">
-                    <div class="footer__col-title">Более</div>
-                    <a href="#">Ресурсы для карьеры</a>
-                    <a href="#">Правила сообщества</a>
-                    <a href="#">Условия использования</a>
-                    <a href="#">Политика конфиденциальности</a>
-                </div>
-                <div class="footer__finuniv">
-                    <div class="finuniv-text">
-                        ФИНАНСОВЫЙ УНИВЕРСИТЕТ<br>
-                        <span>ПРИ ПРАВИТЕЛЬСТВЕ РФ</span>
-                    </div>
-                </div>
+        <div class="footer-inner">
+            <div class="footer-col">
+                <h4>О нас</h4>
+                <a href="#">Миссия</a>
+                <a href="#">Наше влияние</a>
+                <a href="#">Команда</a>
+                <a href="#">Найм</a>
+                <a href="#">Блог</a>
+                <a href="#">Контакты</a>
+                <a href="#">ИИ ассистент</a>
             </div>
-            <div class="footer__year">2026</div>
+            <div class="footer-col">
+                <h4>Участникам</h4>
+                <a href="#">Для студентов</a>
+                <a href="#">Для профессионалов</a>
+                <a href="#">Для учителей</a>
+                <a href="#">Донат</a>
+            </div>
+            <div class="footer-col">
+                <h4>Более</h4>
+                <a href="#">Ресурсы для карьеры</a>
+                <a href="#">Правила сообщества</a>
+                <a href="#">Условия использования</a>
+                <a href="#">Политика конфиденциальности</a>
+            </div>
+            <div class="footer-univ">
+                <a href="https://www.fa.ru" target="_blank" rel="noopener noreferrer" class="univ-logo-link">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/LogoFURUS.png"
+                         alt="Финансовый университет при Правительстве РФ"
+                         class="univ-logo-img">
+                </a>
+                <div class="copyright">2026</div>
+            </div>
         </div>
     </footer>
 </div>
@@ -97,30 +133,61 @@
     function showToast(message, type) {
         const container = document.getElementById('toast-container');
         if (!container) return;
-
         const toast = document.createElement('div');
         toast.className = `toast toast-${type}`;
         toast.textContent = message;
-
         container.appendChild(toast);
-
-        setTimeout(() => {
-            toast.classList.add('show');
-        }, 10);
-
+        setTimeout(() => toast.classList.add('show'), 10);
         setTimeout(() => {
             toast.classList.remove('show');
-            setTimeout(() => {
-                toast.remove();
-            }, 300);
+            setTimeout(() => toast.remove(), 300);
         }, 4000);
     }
+    if (window.flashMessages) window.flashMessages.forEach(msg => showToast(msg.message, msg.category));
+</script>
 
-    if (window.flashMessages && window.flashMessages.length) {
-        window.flashMessages.forEach(msg => {
-            showToast(msg.message, msg.category);
-        });
+<script>
+    // Бургер-меню с анимацией
+    const burgerBtn = document.getElementById('burgerBtn');
+    const burgerDropdown = document.getElementById('burgerDropdown');
+    const overlay = document.createElement('div');
+    overlay.className = 'burger-overlay';
+    document.body.appendChild(overlay);
+
+    function openMenu() {
+        burgerDropdown.classList.add('open');
+        overlay.classList.add('show');
+        burgerBtn.classList.add('open');
+        document.body.style.overflow = 'hidden';
     }
+
+    function closeMenu() {
+        burgerDropdown.classList.remove('open');
+        overlay.classList.remove('show');
+        burgerBtn.classList.remove('open');
+        document.body.style.overflow = '';
+    }
+
+    burgerBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (burgerDropdown.classList.contains('open')) {
+            closeMenu();
+        } else {
+            openMenu();
+        }
+    });
+
+    overlay.addEventListener('click', closeMenu);
+
+    document.querySelectorAll('.burger-menu-section a').forEach(link => {
+        link.addEventListener('click', closeMenu);
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && burgerDropdown.classList.contains('open')) {
+            closeMenu();
+        }
+    });
 </script>
 </body>
 </html>

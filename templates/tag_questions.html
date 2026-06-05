@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="tag-questions">
+    <h1>Вопросы с тегом #{{ tag_name }}</h1>
+
+    {% if questions %}
+        <div class="questions-list">
+            {% for q in questions %}
+                <div class="question-card">
+                    <div class="question-stats">
+                        <span>{{ q.votes }} голосов</span>
+                        <span>{{ q.answer_count }} ответов</span>
+                        <span>{{ q.views }} просмотров</span>
+                    </div>
+                    <div class="question-title">
+                        <a href="{{ url_for('question_detail', question_id=q.id) }}">{{ q.title }}</a>
+                    </div>
+                    <div class="question-meta">
+                        <span>Автор: {{ q.author_email }}</span>
+                        <span>{{ q.created_at[:16] }}</span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>Вопросов с этим тегом пока нет.</p>
+    {% endif %}
+</div>
+{% endblock %}

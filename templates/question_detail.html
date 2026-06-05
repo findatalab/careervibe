@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="question-detail">
+    <div class="question-header">
+        <h1>{{ question.title }}</h1>
+        <div class="question-meta">
+            <span>Задан: {{ question.created_at[:16] }}</span>
+            <span>Автор: <a href="{{ url_for('profile', user_id=question.user_id) }}">{{ question.nickname or question.email }}</a></span>
+            <span>Просмотров: {{ question.views }}</span>
+            <span>Голосов: {{ question.votes }}</span>
+        </div>
+    </div>
+
+    <div class="question-content">
+        <div class="voting">
+            <button class="vote-up" data-type="question" data-id="{{ question.id }}">▲</button>
+            <span class="vote-count" id="question-votes-{{ question.id }}">{{ question.votes }}</span>
+            <button class="vote-down" data-type="question" data-id="{{ question.id }}">▼</button>
+        </div>
+        <div class="question-text">
+            <p>{{ question.content|replace('\n', '<br>')|safe }}</p>
+            {% if tags %}
+                <div class="question-tags">
+                    {% for tag in tags %}
+                        <a href="{{ url_for('tag_questions', tag_name=tag.name) }}" class="tag">#{{ tag.name }}</a>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {% if user_id == question.user_id %}
+                <div class="question-actions">
+                    <a href="{{ url_for('edit_question', question_id=question.id) }}" class="btn-small">Редактировать</a>
+                    <form method="post" action="{{ url_for('delete_question', question_id=question.id) }}" style="display:inline;">
+                        <button type="submit" class="btn-small btn-danger" onclick="return confirm('Удалить вопрос?')">Удалить</button>
+                    </form>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Ответы -->
+    <div class="answers-section">
+        <h2>{{ answers|length }} ответа</h2>
+        {% for answer in answers %}
+            <div class="answer-card {% if answer.is_best %}best-answer{% endif %}" id="answer-{{ answer.id }}">
+                <div class="voting">
+                    <button class="vote-up" data-type="answer" data-id="{{ answer.id }}">▲</button>
+                    <span class="vote-count" id="answer-votes-{{ answer.id }}">{{ answer.votes }}</span>
+                    <button class="vote-down" data-type="answer" data-id="{{ answer.id }}">▼</button>
+                </div>
+                <div class="answer-content">
+                    <p>{{ answer.content|replace('\n', '<br>')|safe }}</p>
+                    <div class="answer-meta">
+                        <span>Ответил: <a href="{{ url_for('profile', user_id=answer.user_id) }}">{{ answer.nickname or answer.email }}</a></span>
+                        <span>{{ answer.created_at[:16] }}</span>
+                        {% if answer.is_best %}
+                            <span class="best-badge">★ Лучший ответ</span>
+                        {% endif %}
+                    </div>
+                    {% if user_id == answer.user_id %}
+                        <div class="answer-actions">
+                            <a href="{{ url_for('edit_answer', answer_id=answer.id) }}" class="btn-small">Редактировать</a>
+                            <form method="post" action="{{ url_for('delete_answer', answer_id=answer.id) }}" style="display:inline;">
+                                <button type="submit" class="btn-small btn-danger" onclick="return confirm('Удалить ответ?')">Удалить</button>
+                            </form>
+                        </div>
+                    {% endif %}
+                    {% if user_id == question.user_id and not answer.is_best %}
+                        <form method="post" action="{{ url_for('mark_best_answer', answer_id=answer.id) }}" style="margin-top:10px;">
+                            <button type="submit" class="btn-small btn-best">Отметить как лучший</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Форма добавления ответа -->
+    {% if user_id %}
+        <div class="add-answer">
+            <h3>Ваш ответ</h3>
+            <form method="post" action="{{ url_for('add_answer', question_id=question.id) }}">
+                <textarea name="content" rows="5" required placeholder="Напишите ответ..."></textarea>
+                <button type="submit" class="btn btn-primary">Отправить ответ</button>
+            </form>
+        </div>
+    {% else %}
+        <div class="login-to-answer">
+            <p><a href="{{ url_for('login') }}">Войдите</a>, чтобы ответить на вопрос.</p>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+// Голосование через AJAX
+document.querySelectorAll('.vote-up, .vote-down').forEach(btn => {
+    btn.addEventListener('click', async function() {
+        const type = this.dataset.type;
+        const id = this.dataset.id;
+        const voteType = this.classList.contains('vote-up') ? 'up' : 'down';
+
+        const response = await fetch(`/${type}/${id}/vote`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `vote_type=${voteType}`
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            const voteSpan = document.getElementById(`${type}-votes-${id}`);
+            if (voteSpan) voteSpan.textContent = data.votes;
+        } else {
+            alert('Ошибка голосования. Возможно, требуется авторизация.');
+        }
+    });
+});
+</script>
+{% endblock %}

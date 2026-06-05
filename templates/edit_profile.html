@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="edit-profile-container">
+    <h1>Редактирование профиля</h1>
+    <form method="post" enctype="multipart/form-data" class="edit-form">
+        <div class="form-group">
+            <label>Email (не меняется)</label>
+            <input type="email" value="{{ user.email }}" disabled>
+        </div>
+        <div class="form-group">
+            <label>Никнейм</label>
+            <input type="text" name="nickname" value="{{ user.nickname or '' }}" placeholder="Ваш публичный ник">
+        </div>
+        <div class="form-group">
+            <label>Аватарка</label>
+            {% if user.avatar %}
+                <div class="current-avatar">
+                    <img src="{{ url_for('static', filename='avatars/' + user.avatar) }}" alt="avatar" width="80" style="border-radius: 50%;">
+                </div>
+            {% endif %}
+            <input type="file" name="avatar" accept="image/png, image/jpeg, image/jpg, image/gif">
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+            <a href="{{ url_for('profile', user_id=user.id) }}" class="btn btn-secondary">Отмена</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

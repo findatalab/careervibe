@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="edit-answer-container">
+    <h1>Редактировать ответ</h1>
+    <form method="post" class="edit-form">
+        <div class="form-group">
+            <label for="content">Текст ответа</label>
+            <textarea id="content" name="content" rows="6" required>{{ answer.content }}</textarea>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+            <a href="{{ url_for('question_detail', question_id=answer.question_id) }}" class="btn btn-secondary">Отмена</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
