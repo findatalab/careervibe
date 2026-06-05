@@ -199,8 +199,7 @@ careervibe/
 Финансовый университет при Правительстве РФ  
 Лаборатория искусственного интеллекта  
 
-[![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat&logo=github)](https://github.com/yourusername)
-[![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=flat&logo=telegram)](https://t.me/yourusername)
+[![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat&logo=github)](https://github.com/Y-deva)
 
 ---
 
