@@ -128,7 +128,7 @@ careervibe/
 ├── init_db.py               # Скрипт создания базы данных
 ├── requirements.txt         # Зависимости проекта
 ├── instance/
-│   └── careervibe.db        # База данных SQLite (создаётся автоматически)
+│   └── careervibe.db        # База данных SQLite (создаётся после запуска init_db.py)
 ├── static/
 │   ├── style.css            # Все стили проекта
 │   └── avatars/             # Загруженные аватарки пользователей
