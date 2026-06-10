@@ -9,23 +9,80 @@
         <div class="questions-list">
             {% for q in questions %}
                 <div class="question-card">
-                    <div class="question-stats">
-                        <span>{{ q.votes }} голосов</span>
-                        <span>{{ q.answer_count }} ответов</span>
-                        <span>{{ q.views }} просмотров</span>
+                    <div class="question-card-left">
+                        <a href="{{ url_for('profile', user_id=q.user_id) }}" class="question-avatar-link">
+                            {% if q.avatar %}
+                                <img src="{{ url_for('static', filename='avatars/' + q.avatar) }}" alt="avatar" class="question-avatar-img">
+                            {% else %}
+                                <div class="question-avatar-placeholder">{{ (q.nickname or 'U')[0]|upper }}</div>
+                            {% endif %}
+                        </a>
                     </div>
-                    <div class="question-title">
-                        <a href="{{ url_for('question_detail', question_id=q.id) }}">{{ q.title }}</a>
-                    </div>
-                    <div class="question-meta">
-                        <span>Автор: {{ q.author_email }}</span>
-                        <span>{{ q.created_at[:16] }}</span>
+                    <div class="question-card-right">
+                        <div class="question-stats">
+                            <span>{{ q.votes }} голосов</span>
+                            <span>{{ q.answer_count }} ответов</span>
+                            <span>{{ q.views }} просмотров</span>
+                        </div>
+                        <div class="question-title">
+                            <a href="{{ url_for('question_detail', question_id=q.id) }}">{{ q.title }}</a>
+                        </div>
+                        <div class="question-meta">
+                            <span>Автор: <a href="{{ url_for('profile', user_id=q.user_id) }}">{{ q.nickname or 'Пользователь' }}</a></span>
+                            <span>{{ q.created_at[:16] }}</span>
+                        </div>
+                        {% if q.tags %}
+                            <div class="question-tags">
+                                {% for tag in q.tags %}
+                                    <a href="{{ url_for('tag_questions', tag_name=tag) }}" class="tag">#{{ tag }}</a>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="question-snippet">{{ q.content[:150] }}{% if q.content|length > 150 %}...{% endif %}</div>
                     </div>
                 </div>
             {% endfor %}
         </div>
     {% else %}
-        <p>По вашему запросу ничего не найдено.</p>
+        <div class="empty-search">
+            <p>По вашему запросу ничего не найдено.</p>
+            <p>Попробуйте:</p>
+            <ul>
+                <li>Изменить ключевые слова</li>
+                <li>Использовать поиск по тегу: <code>#тег</code></li>
+                <li><a href="{{ url_for('ask_question') }}">Задать новый вопрос</a></li>
+            </ul>
+        </div>
     {% endif %}
 </div>
+
+<style>
+    .search-results {
+        max-width: 1200px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+    .search-results h1 {
+        color: #1a3a6e;
+        margin-bottom: 10px;
+    }
+    .empty-search {
+        background: white;
+        border-radius: 16px;
+        padding: 40px;
+        text-align: center;
+    }
+    .empty-search ul {
+        list-style: none;
+        margin-top: 15px;
+    }
+    .empty-search li {
+        margin: 8px 0;
+    }
+    .empty-search code {
+        background: #f4f4f4;
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+</style>
 {% endblock %}

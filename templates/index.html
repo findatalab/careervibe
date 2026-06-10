@@ -38,7 +38,7 @@
                     {% if user_avatar %}
                         <img src="{{ url_for('static', filename='avatars/' + user_avatar) }}" alt="avatar">
                     {% else %}
-                        <span>{{ (user_nickname or user_email)[0]|upper }}</span>
+                        <span>{{ user_nickname[0]|upper if user_nickname else '?' }}</span>
                     {% endif %}
                 </div>
                 <div class="ask-invitation__text">Что вы хотите спросить у специалистов?</div>
@@ -61,7 +61,7 @@
                             {% if q.avatar %}
                                 <img src="{{ url_for('static', filename='avatars/' + q.avatar) }}" alt="avatar" class="question-avatar-img">
                             {% else %}
-                                <div class="question-avatar-placeholder">{{ (q.nickname or q.email)[0]|upper }}</div>
+                                <div class="question-avatar-placeholder">{{ q.nickname[0]|upper if q.nickname else '?' }}</div>
                             {% endif %}
                         </a>
                     </div>
@@ -75,7 +75,7 @@
                             <a href="{{ url_for('question_detail', question_id=q.id) }}">{{ q.title }}</a>
                         </div>
                         <div class="question-meta">
-                            <span>Автор: <a href="{{ url_for('profile', user_id=q.user_id) }}">{{ q.nickname or q.email }}</a></span>
+                            <span>Автор: <a href="{{ url_for('profile', user_id=q.user_id) }}">{{ q.nickname or 'Пользователь' }}</a></span>
                             <span>{{ q.created_at[:16] }}</span>
                             {% if q.has_best_answer %}
                                 <span class="best-answer-label">Дан ответ</span>
@@ -112,11 +112,11 @@
                             {% if user.avatar %}
                                 <img src="{{ url_for('static', filename='avatars/' + user.avatar) }}" alt="avatar">
                             {% else %}
-                                <span>{{ (user.nickname or user.email)[0]|upper }}</span>
+                                <span>{{ user.nickname[0]|upper if user.nickname else '?' }}</span>
                             {% endif %}
                         </div>
                         <div class="active-user__info">
-                            <span class="active-user__name">{{ user.nickname or user.email }}</span>
+                            <span class="active-user__name">{{ user.nickname }}</span>
                             <span class="active-user__activity">{{ user.activity }} ответов и вопросов</span>
                         </div>
                     </a>
@@ -141,7 +141,7 @@
                     </li>
                 {% endfor %}
             </ul>
-            <a href="#" class="all-tags-link">Посмотреть все <span>→</span></a>
+            <a href="{{ url_for('all_tags') }}" class="all-tags-link">Посмотреть все <span>→</span></a>
         </div>
     </div>
 </div>

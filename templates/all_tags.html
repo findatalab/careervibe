@@ -1,0 +1,755 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="bubble-page">
+    <div class="bubble-header">
+        <h1>Все теги</h1>
+        <p class="bubble-sub">Интерактивная карта тегов — перетаскивайте пузырьки, кликайте для перехода к вопросам</p>
+        <div class="search-wrapper">
+            <input type="text" id="tagSearchInput" class="tag-search-input" placeholder="Поиск тега...">
+            <button id="clearSearchBtn" class="clear-search-btn" title="Очистить">✕</button>
+        </div>
+        <div class="stats-panel">
+            <div class="sliders-row">
+                <div class="physics-sliders">
+                    <div class="slider-group">
+                        <label>Отталкивание</label>
+                        <input type="range" id="repulsionSlider" min="500" max="5000" step="50" value="2800">
+                        <span id="repulsionValue">2800</span>
+                    </div>
+                    <div class="slider-group">
+                        <label>Центр</label>
+                        <input type="range" id="centerSlider" min="0" max="0.0015" step="0.00002" value="0.00120">
+                        <span id="centerValue">0.00120</span>
+                    </div>
+                    <div class="slider-group">
+                        <label>Скорость</label>
+                        <input type="range" id="speedSlider" min="2" max="8" step="0.2" value="5.5">
+                        <span id="speedValue">5.5</span>
+                    </div>
+                </div>
+                <button id="resetPhysicsBtn" class="reset-physics-btn" title="Разбросать пузырьки заново">Сбросить позиции</button>
+            </div>
+            <div class="counter-row">
+                <span>Всего тегов: <strong id="totalTagsCount">0</strong></span>
+            </div>
+        </div>
+    </div>
+    <div id="bubbleCanvas" class="bubble-canvas"></div>
+</div>
+
+<style>
+    /* стили скорректированы: ширина как в mission-странице, градиент заменён на mission */
+    .bubble-page {
+        max-width: 1000px;
+        margin: 40px auto;
+        background: rgba(255,255,255,0.96);
+        border-radius: 32px;
+        overflow: hidden;
+        box-shadow: 0 20px 35px -12px rgba(0,0,0,0.2);
+        backdrop-filter: blur(2px);
+    }
+    .bubble-header {
+        background: linear-gradient(90deg, #283f80 0%, #0b9cb5 100%); /* изменено на градиент из mission */
+        padding: 28px 28px 20px 28px;
+        text-align: center;
+        position: relative;
+    }
+    .bubble-header h1 {
+        font-size: 46px;
+        font-weight: 800;
+        background: linear-gradient(135deg, #fff, #d4f1ff);
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+        margin-bottom: 8px;
+    }
+    .bubble-sub {
+        font-size: 18px;
+        opacity: 0.92;
+        margin-bottom: 22px;
+        color: #f0fcff;
+    }
+    .search-wrapper {
+        position: relative;
+        display: inline-block;
+        width: 100%;
+        max-width: 460px;
+        margin: 0 auto 12px auto;
+    }
+    .tag-search-input {
+        width: 100%;
+        padding: 14px 50px 14px 28px;
+        border-radius: 60px;
+        border: none;
+        font-size: 16px;
+        font-weight: 500;
+        outline: none;
+        background: rgba(255,255,255,0.25);
+        backdrop-filter: blur(12px);
+        color: white;
+        transition: all 0.25s;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .tag-search-input:focus {
+        background: rgba(255,255,255,0.4);
+        box-shadow: 0 0 0 4px rgba(255,255,200,0.3);
+        transform: scale(1.01);
+    }
+    .tag-search-input::placeholder {
+        color: rgba(255,255,255,0.8);
+    }
+    .clear-search-btn {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(0,0,0,0.2);
+        border: none;
+        color: white;
+        font-size: 18px;
+        cursor: pointer;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+    .clear-search-btn:hover {
+        background: rgba(0,0,0,0.5);
+        transform: translateY(-50%) scale(1.08);
+    }
+    .stats-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        background: rgba(0,0,0,0.35);
+        border-radius: 80px;
+        padding: 8px 18px;
+        margin-top: 16px;
+        backdrop-filter: blur(8px);
+        color: white;
+        font-weight: 500;
+        font-size: 14px;
+    }
+    .sliders-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    .counter-row {
+        text-align: center;
+        padding-top: 4px;
+        border-top: 1px solid rgba(255,255,255,0.2);
+    }
+    .physics-sliders {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        justify-content: center;
+        background: rgba(0,0,0,0.3);
+        padding: 5px 15px;
+        border-radius: 50px;
+    }
+    .slider-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+    }
+    .slider-group label {
+        font-weight: 600;
+    }
+    .slider-group input {
+        width: 100px;
+        cursor: pointer;
+        background: rgba(255,255,255,0.2);
+        border-radius: 10px;
+        height: 3px;
+    }
+    .slider-group span {
+        background: none;
+        padding: 0;
+        min-width: 45px;
+        text-align: left;
+    }
+    .reset-physics-btn {
+        background: rgba(255,255,255,0.2);
+        border: none;
+        color: white;
+        padding: 5px 14px;
+        border-radius: 40px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 13px;
+        white-space: nowrap;
+    }
+    .reset-physics-btn:hover {
+        background: rgba(255,255,255,0.4);
+        transform: scale(1.02);
+    }
+    .bubble-canvas {
+        position: relative;
+        width: calc(100% - 40px);
+        height: 70vh;
+        min-height: 550px;
+        margin: 20px;
+        background: radial-gradient(circle at 20% 30%, #eef2ff, #d4e0f5);
+        border-radius: 36px;
+        overflow: hidden;
+        cursor: grab;
+        box-shadow: inset 0 0 0 2px rgba(255,255,255,0.6), 0 12px 28px rgba(0,0,0,0.2);
+        transition: box-shadow 0.2s;
+    }
+    .bubble-canvas:active {
+        cursor: grabbing;
+    }
+    .bubble {
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: white;
+        font-weight: 700;
+        text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        will-change: left, top, width, height;
+        cursor: pointer;
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255,255,255,0.5);
+        transition: transform 0.15s cubic-bezier(0.2, 0.9, 0.4, 1.1), box-shadow 0.2s;
+        box-shadow: 0 10px 20px -5px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.5);
+        word-break: break-word;
+        padding: 0 12px;
+        background: radial-gradient(circle at 30% 30%, rgba(255,255,245,0.95), rgba(100,150,220,0.85));
+    }
+    .bubble:hover {
+        transform: scale(1.03);
+        box-shadow: 0 18px 28px -8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.7);
+        border-color: rgba(255,255,210,0.9);
+        z-index: 20;
+    }
+    .bubble.oval {
+        border-radius: 60px / 50px;
+    }
+    .bubble:not(.oval) {
+        border-radius: 50%;
+    }
+    .bubble a {
+        color: white;
+        text-decoration: none;
+        display: block;
+        font-weight: 700;
+        pointer-events: none;
+        line-height: 1.2;
+    }
+    .bubble-count {
+        font-size: 0.65em;
+        background: rgba(0,0,0,0.35);
+        backdrop-filter: blur(2px);
+        padding: 2px 8px;
+        border-radius: 30px;
+        margin-top: 6px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+    }
+    .bubble.hidden {
+        display: none;
+    }
+    @media (max-width: 700px) {
+        .bubble-canvas {
+            height: 65vh;
+            min-height: 480px;
+        }
+        .bubble-header h1 {
+            font-size: 32px;
+        }
+        .stats-panel {
+            font-size: 12px;
+            border-radius: 50px;
+        }
+        .sliders-row {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .physics-sliders {
+            width: 100%;
+            justify-content: space-between;
+        }
+        .slider-group input {
+            width: 70px;
+        }
+        .reset-physics-btn {
+            align-self: center;
+        }
+        .bubble {
+            font-size: 12px !important;
+        }
+    }
+    @media (max-width: 480px) {
+        .bubble-canvas {
+            height: 70vh;
+            min-height: 420px;
+        }
+        .slider-group {
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+    }
+</style>
+
+<script>
+    (function() {
+        const tagsData = {{ tags | tojson | safe }};
+        const container = document.getElementById('bubbleCanvas');
+        let containerRect = container.getBoundingClientRect();
+
+        let bubbles = [];
+        let animationId = null;
+        let isDragging = false;
+        let draggedBubble = null;
+        let dragOffsetX = 0, dragOffsetY = 0;
+        let dragMouseX = 0, dragMouseY = 0;
+        let dragStarted = false;
+        let dragStartPos = { x: 0, y: 0 };
+
+        // Переменные физики (будут обновляться слайдерами)
+        let REPULSION_STRENGTH = 2800;
+        let REPULSION_EXP = 1.9;
+        let CENTER_STRENGTH = 0.00120;
+        let VELOCITY_DAMP = 0.96;
+        let MAX_SPEED = 5.5;
+        const ITERATIONS = 8;
+        const MIN_REPULSION_DIST = 4.0;
+
+        let minBubbleSize = 48;
+        let maxBubbleSize = 172;
+
+        // Элементы слайдеров
+        const repulsionSlider = document.getElementById('repulsionSlider');
+        const centerSlider = document.getElementById('centerSlider');
+        const speedSlider = document.getElementById('speedSlider');
+        const repulsionValue = document.getElementById('repulsionValue');
+        const centerValue = document.getElementById('centerValue');
+        const speedValue = document.getElementById('speedValue');
+
+        // Обновление значений физики из слайдеров
+        function updatePhysicsFromSliders() {
+            REPULSION_STRENGTH = parseFloat(repulsionSlider.value);
+            CENTER_STRENGTH = parseFloat(centerSlider.value);
+            MAX_SPEED = parseFloat(speedSlider.value);
+            repulsionValue.textContent = REPULSION_STRENGTH;
+            centerValue.textContent = CENTER_STRENGTH.toFixed(5);
+            speedValue.textContent = MAX_SPEED.toFixed(1);
+        }
+
+        repulsionSlider.addEventListener('input', updatePhysicsFromSliders);
+        centerSlider.addEventListener('input', updatePhysicsFromSliders);
+        speedSlider.addEventListener('input', updatePhysicsFromSliders);
+
+        // Функция сброса ползунков на значения по умолчанию
+        function resetSlidersToDefault() {
+            repulsionSlider.value = '2800';
+            centerSlider.value = '0.00120';
+            speedSlider.value = '5.5';
+            updatePhysicsFromSliders();
+        }
+
+        // ---------- Вспомогательные функции ----------
+        function randomRange(min, max) {
+            return min + Math.random() * (max - min);
+        }
+
+        function getNonIntersectingPosition(width, height, radius, existingBubbles, maxAttempts = 500) {
+            for (let attempt = 0; attempt < maxAttempts; attempt++) {
+                const x = randomRange(45, containerRect.width - width - 45);
+                const y = randomRange(45, containerRect.height - height - 45);
+                let collides = false;
+                for (let b of existingBubbles) {
+                    const dx = (x + radius) - (b.x + b.radius);
+                    const dy = (y + radius) - (b.y + b.radius);
+                    const dist = Math.hypot(dx, dy);
+                    if (dist < (radius + b.radius)) {
+                        collides = true;
+                        break;
+                    }
+                }
+                if (!collides) return { x, y };
+            }
+            return { x: randomRange(45, containerRect.width - width - 45),
+                     y: randomRange(45, containerRect.height - height - 45) };
+        }
+
+        function getBubbleSize(count, maxCount) {
+            if (maxCount === 0) return minBubbleSize;
+            const ratio = Math.pow(count / maxCount, 0.65);
+            let size = minBubbleSize + ratio * (maxBubbleSize - minBubbleSize);
+            if (count > maxCount * 0.7) size = Math.min(size * 1.15, maxBubbleSize);
+            return Math.floor(size);
+        }
+
+        function getFontSize(count, maxCount, bubbleSize) {
+            let base = Math.max(12, Math.min(26, bubbleSize / 7 + 6));
+            if (count > maxCount * 0.8) base += 2;
+            return Math.min(28, base);
+        }
+
+        function createBubbleElement(tag, count, maxCount, bubbleSize, fontSize) {
+            const hue = 205 + Math.min(count * 0.7, 40);
+            const sat = 60 + Math.min(count * 0.4, 20);
+            const div = document.createElement('div');
+            div.className = 'bubble';
+            div.setAttribute('data-tag', tag);
+            div.setAttribute('data-count', count);
+            div.innerHTML = `<a href="/tag/${encodeURIComponent(tag)}">#${tag}</a><span class="bubble-count">${count}</span>`;
+            div.style.width = bubbleSize + 'px';
+            div.style.height = bubbleSize + 'px';
+            div.style.fontSize = fontSize + 'px';
+            div.style.background = `radial-gradient(circle at 35% 30%, hsl(${hue}, ${sat}%, 70%), hsl(${hue-12}, ${sat+10}%, 45%))`;
+            container.appendChild(div);
+            return div;
+        }
+
+        function updateOvalShape(bubbleObj) {
+            const el = bubbleObj.el;
+            const textWidth = el.scrollWidth;
+            let currentWidth = parseFloat(el.style.width);
+            if (textWidth > currentWidth - 18) {
+                let newWidth = Math.min(currentWidth + 34, 240);
+                el.style.width = newWidth + 'px';
+                el.classList.add('oval');
+                bubbleObj.width = newWidth;
+                bubbleObj.height = Math.max(parseInt(newWidth * 0.73), 44);
+                el.style.height = bubbleObj.height + 'px';
+                bubbleObj.radius = (newWidth + bubbleObj.height) / 4;
+            } else {
+                el.classList.remove('oval');
+                bubbleObj.width = currentWidth;
+                bubbleObj.height = currentWidth;
+                el.style.height = currentWidth + 'px';
+                bubbleObj.radius = currentWidth / 2;
+            }
+        }
+
+        function clampPosition(b) {
+            const margin = 12;
+            const maxX = containerRect.width - b.width - margin;
+            const maxY = containerRect.height - b.height - margin;
+            const minX = margin;
+            const minY = margin;
+            if (maxX <= minX || maxY <= minY) return;
+            b.x = Math.min(maxX, Math.max(minX, b.x));
+            b.y = Math.min(maxY, Math.max(minY, b.y));
+        }
+
+        // -----------------------------
+        // СИЛОВАЯ МОДЕЛЬ (с динамическими параметрами)
+        // -----------------------------
+        function computeForces() {
+            for (let b of bubbles) {
+                if (b.hidden) continue;
+                b.fx = 0;
+                b.fy = 0;
+            }
+
+            for (let i = 0; i < bubbles.length; i++) {
+                const a = bubbles[i];
+                if (a.hidden) continue;
+                for (let j = i + 1; j < bubbles.length; j++) {
+                    const b = bubbles[j];
+                    if (b.hidden) continue;
+                    const dx = a.x + a.radius - (b.x + b.radius);
+                    const dy = a.y + a.radius - (b.y + b.radius);
+                    let dist = Math.hypot(dx, dy);
+                    if (dist < MIN_REPULSION_DIST) dist = MIN_REPULSION_DIST;
+                    const forceMag = REPULSION_STRENGTH / Math.pow(dist, REPULSION_EXP);
+                    const angle = Math.atan2(dy, dx);
+                    const fx = Math.cos(angle) * forceMag;
+                    const fy = Math.sin(angle) * forceMag;
+                    a.fx += fx;
+                    a.fy += fy;
+                    b.fx -= fx;
+                    b.fy -= fy;
+                }
+            }
+
+            const centerX = containerRect.width / 2;
+            const centerY = containerRect.height / 2;
+            for (let b of bubbles) {
+                if (b.hidden) continue;
+                const toCenterX = centerX - (b.x + b.radius);
+                const toCenterY = centerY - (b.y + b.radius);
+                b.fx += toCenterX * CENTER_STRENGTH;
+                b.fy += toCenterY * CENTER_STRENGTH;
+            }
+        }
+
+        function integrate() {
+            for (let b of bubbles) {
+                if (b.hidden) continue;
+                if (isDragging && draggedBubble === b) {
+                    b.vx = 0;
+                    b.vy = 0;
+                    continue;
+                }
+                const invMass = 1.0 / b.mass;
+                b.vx += b.fx * invMass;
+                b.vy += b.fy * invMass;
+
+                let spd = Math.hypot(b.vx, b.vy);
+                if (spd > MAX_SPEED) {
+                    b.vx = (b.vx / spd) * MAX_SPEED;
+                    b.vy = (b.vy / spd) * MAX_SPEED;
+                }
+                b.vx *= VELOCITY_DAMP;
+                b.vy *= VELOCITY_DAMP;
+
+                b.x += b.vx;
+                b.y += b.vy;
+                clampPosition(b);
+            }
+        }
+
+        function handleBoundaries() {
+            const margin = 12;
+            for (let b of bubbles) {
+                if (b.hidden) continue;
+                if (b.x <= margin) {
+                    b.x = margin;
+                    b.vx = -b.vx * 0.85;
+                }
+                if (b.x + b.width >= containerRect.width - margin) {
+                    b.x = containerRect.width - b.width - margin;
+                    b.vx = -b.vx * 0.85;
+                }
+                if (b.y <= margin) {
+                    b.y = margin;
+                    b.vy = -b.vy * 0.85;
+                }
+                if (b.y + b.height >= containerRect.height - margin) {
+                    b.y = containerRect.height - b.height - margin;
+                    b.vy = -b.vy * 0.85;
+                }
+            }
+        }
+
+        function simulatePhysics() {
+            for (let iter = 0; iter < ITERATIONS; iter++) {
+                computeForces();
+                integrate();
+                handleBoundaries();
+            }
+        }
+
+        // -----------------------------
+        // АНИМАЦИОННЫЙ ЦИКЛ
+        // -----------------------------
+        function animate() {
+            simulatePhysics();
+
+            if (isDragging && draggedBubble && !draggedBubble.hidden) {
+                let newX = dragMouseX - containerRect.left - dragOffsetX;
+                let newY = dragMouseY - containerRect.top - dragOffsetY;
+                draggedBubble.x = newX;
+                draggedBubble.y = newY;
+                clampPosition(draggedBubble);
+            }
+
+            for (let b of bubbles) {
+                if (b.hidden) {
+                    b.el.style.display = 'none';
+                    continue;
+                }
+                b.el.style.display = 'flex';
+                b.el.style.left = b.x + 'px';
+                b.el.style.top = b.y + 'px';
+            }
+
+            animationId = requestAnimationFrame(animate);
+        }
+
+        // -----------------------------
+        // ИНИЦИАЛИЗАЦИЯ
+        // -----------------------------
+        function initBubbles() {
+            bubbles.forEach(b => b.el.remove());
+            bubbles = [];
+            if (tagsData.length === 0) return;
+
+            let maxCount = 1;
+            for (let tag of tagsData) if (tag.count > maxCount) maxCount = tag.count;
+
+            const totalTags = tagsData.length;
+            const screenWidth = window.innerWidth;
+            if (totalTags > 80) { minBubbleSize = 38; maxBubbleSize = 140; }
+            else if (totalTags > 40) { minBubbleSize = 44; maxBubbleSize = 158; }
+            else { minBubbleSize = 48; maxBubbleSize = 172; }
+            if (screenWidth < 700) { minBubbleSize = Math.max(34, minBubbleSize - 6); maxBubbleSize = Math.min(130, maxBubbleSize - 20); }
+
+            for (let idx = 0; idx < tagsData.length; idx++) {
+                const tagItem = tagsData[idx];
+                const count = tagItem.count || 1;
+                const bubbleSize = getBubbleSize(count, maxCount);
+                const fontSize = getFontSize(count, maxCount, bubbleSize);
+                const el = createBubbleElement(tagItem.name, count, maxCount, bubbleSize, fontSize);
+                const width = parseFloat(el.style.width);
+                const height = parseFloat(el.style.height) || width;
+                const radius = (width + height) / 4;
+
+                const { x, y } = getNonIntersectingPosition(width, height, radius, bubbles);
+                el.style.left = x + 'px';
+                el.style.top = y + 'px';
+
+                const mass = Math.pow(count, 0.68) * 1.2 + 5;
+                bubbles.push({
+                    id: idx,
+                    el: el,
+                    tag: tagItem.name,
+                    mass: mass,
+                    width: width,
+                    height: height,
+                    radius: radius,
+                    x: x, y: y,
+                    vx: (Math.random() - 0.5) * 0.6,
+                    vy: (Math.random() - 0.5) * 0.6,
+                    fx: 0, fy: 0,
+                    hidden: false
+                });
+                updateOvalShape(bubbles[bubbles.length-1]);
+            }
+
+            // Предварительная стабилизация
+            for (let i = 0; i < 120; i++) {
+                computeForces();
+                integrate();
+                handleBoundaries();
+            }
+            for (let b of bubbles) {
+                b.el.style.left = b.x + 'px';
+                b.el.style.top = b.y + 'px';
+            }
+
+            applySearchFilter();
+            const totalSpan = document.getElementById('totalTagsCount');
+            if (totalSpan) totalSpan.innerText = bubbles.length;
+        }
+
+        function applySearchFilter() {
+            const searchTerm = document.getElementById('tagSearchInput').value.toLowerCase().trim();
+            for (let b of bubbles) {
+                const matches = searchTerm === '' || b.tag.toLowerCase().includes(searchTerm);
+                b.hidden = !matches;
+                if (matches) b.el.classList.remove('hidden');
+                else b.el.classList.add('hidden');
+            }
+        }
+
+        function resetPositions() {
+            // Сброс ползунков на значения по умолчанию
+            resetSlidersToDefault();
+
+            // Сброс позиций пузырьков
+            for (let b of bubbles) {
+                if (!b.hidden) {
+                    b.x = randomRange(35, containerRect.width - b.width - 35);
+                    b.y = randomRange(35, containerRect.height - b.height - 35);
+                    b.vx = (Math.random() - 0.5) * 0.6;
+                    b.vy = (Math.random() - 0.5) * 0.6;
+                    clampPosition(b);
+                    b.el.style.left = b.x + 'px';
+                    b.el.style.top = b.y + 'px';
+                }
+            }
+            for (let i = 0; i < 80; i++) {
+                computeForces();
+                integrate();
+                handleBoundaries();
+            }
+            for (let b of bubbles) {
+                b.el.style.left = b.x + 'px';
+                b.el.style.top = b.y + 'px';
+            }
+        }
+
+        // -----------------------------
+        // ОБРАБОТЧИКИ МЫШИ
+        // -----------------------------
+        function onMouseDown(e) {
+            const targetEl = e.target.closest('.bubble');
+            if (!targetEl) return;
+            e.preventDefault();
+            const bubble = bubbles.find(b => b.el === targetEl);
+            if (!bubble || bubble.hidden) return;
+            dragStartPos = { x: e.clientX, y: e.clientY };
+            dragStarted = false;
+            isDragging = true;
+            draggedBubble = bubble;
+            const rect = targetEl.getBoundingClientRect();
+            const centerX = rect.left + bubble.radius;
+            const centerY = rect.top + bubble.radius;
+            dragOffsetX = e.clientX - centerX;
+            dragOffsetY = e.clientY - centerY;
+            dragMouseX = e.clientX;
+            dragMouseY = e.clientY;
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        }
+
+        function onMouseMove(e) {
+            if (!isDragging || !draggedBubble) return;
+            if (Math.abs(e.clientX - dragStartPos.x) > 3 || Math.abs(e.clientY - dragStartPos.y) > 3) dragStarted = true;
+            dragMouseX = e.clientX;
+            dragMouseY = e.clientY;
+        }
+
+        function onMouseUp(e) {
+            isDragging = false;
+            if (!dragStarted && draggedBubble) {
+                window.location.href = `/tag/${encodeURIComponent(draggedBubble.tag)}`;
+            }
+            draggedBubble = null;
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+            dragStarted = false;
+        }
+
+        function onCanvasClick(e) {
+            const target = e.target.closest('.bubble');
+            if (target && !dragStarted) e.preventDefault();
+        }
+
+        function onResize() {
+            containerRect = container.getBoundingClientRect();
+            for (let b of bubbles) {
+                if (!b.hidden) {
+                    clampPosition(b);
+                    b.el.style.left = b.x + 'px';
+                    b.el.style.top = b.y + 'px';
+                }
+            }
+        }
+
+        window.addEventListener('load', () => {
+            containerRect = container.getBoundingClientRect();
+            initBubbles();
+            container.addEventListener('mousedown', onMouseDown);
+            container.addEventListener('click', onCanvasClick);
+            window.addEventListener('resize', () => setTimeout(onResize, 120));
+            document.getElementById('tagSearchInput').addEventListener('input', applySearchFilter);
+            document.getElementById('clearSearchBtn').addEventListener('click', () => {
+                document.getElementById('tagSearchInput').value = '';
+                applySearchFilter();
+            });
+            document.getElementById('resetPhysicsBtn').addEventListener('click', resetPositions);
+            animate();
+        });
+    })();
+</script>
+{% endblock %}

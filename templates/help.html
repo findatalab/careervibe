@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="help-page">
+    <div class="help-hero">
+        <h1>Помощь</h1>
+        <p>Ответы на популярные вопросы и руководство по использованию платформы</p>
+    </div>
+
+    <div class="help-content">
+        <div class="help-block">
+            <h2>📝 Как задать вопрос?</h2>
+            <p>1. Нажмите кнопку <strong>«Задать вопрос»</strong> в правом верхнем углу.</p>
+            <p>2. Заполните заголовок и текст вопроса. Вы можете использовать <strong>Markdown</strong> и <strong>LaTeX</strong> для форматирования.</p>
+            <p>3. Добавьте до 7 тегов, разделяя их запятыми или нажимая Enter.</p>
+            <p>4. При необходимости прикрепите файлы (изображения, видео, документы).</p>
+            <p>5. Нажмите <strong>«Опубликовать»</strong>.</p>
+        </div>
+
+        <div class="help-block">
+            <h2>📖 Markdown и LaTeX</h2>
+            <p>Редактор поддерживает:</p>
+            <ul>
+                <li><strong>Жирный текст</strong> — <code>**текст**</code></li>
+                <li><em>Курсив</em> — <code>*текст*</code></li>
+                <li><code>Код</code> — <code>`код`</code></li>
+                <li>Заголовки — <code># Заголовок</code>, <code>## Заголовок 2</code></li>
+                <li>Списки — <code>- пункт</code> или <code>1. пункт</code></li>
+                <li>Ссылки — <code>[текст](url)</code></li>
+                <li>Изображения — <code>![alt](url)</code></li>
+                <li>Таблицы — с помощью вертикальных линий и дефисов</li>
+            </ul>
+            <p><strong>LaTeX-формулы:</strong></p>
+            <ul>
+                <li>Внутри строки: <code>$E = mc^2$</code></li>
+                <li>Отдельная формула: <code>$$\int_0^\infty e^{-x^2} dx = \frac{\sqrt{\pi}}{2}$$</code></li>
+            </ul>
+        </div>
+
+        <div class="help-block">
+            <h2>💬 Как отвечать на вопросы?</h2>
+            <p>1. Перейдите на страницу интересующего вас вопроса.</p>
+            <p>2. Напишите ответ в поле <strong>«Ваш ответ»</strong>.</p>
+            <p>3. При необходимости прикрепите файлы.</p>
+            <p>4. Нажмите <strong>«Отправить ответ»</strong>.</p>
+            <p>5. Вы также можете отвечать на уже существующие ответы, нажав кнопку <strong>«Ответить»</strong> под ответом.</p>
+        </div>
+
+        <div class="help-block">
+            <h2>👍 Голосование</h2>
+            <p>Вы можете голосовать за вопросы и ответы, которые считаете полезными:</p>
+            <ul>
+                <li>▲ — полезно / согласен</li>
+                <li>▼ — бесполезно / не согласен</li>
+            </ul>
+            <p>Автор вопроса может отметить лучший ответ, нажав кнопку <strong>«Отметить как лучший»</strong>.</p>
+        </div>
+
+        <div class="help-block">
+            <h2>🔍 Поиск</h2>
+            <p>Используйте строку поиска в шапке сайта:</p>
+            <ul>
+                <li><strong>Поиск по тексту</strong> — просто введите ключевые слова</li>
+                <li><strong>Поиск по тегу</strong> — введите <code>#тег</code> (например, <code>#python</code>)</li>
+            </ul>
+            <p>Также вы можете просмотреть <a href="{{ url_for('all_tags') }}">все теги</a> и выбрать интересующий.</p>
+        </div>
+
+        <div class="help-block">
+            <h2>👤 Профиль</h2>
+            <p>В профиле вы можете:</p>
+            <ul>
+                <li>Изменить никнейм</li>
+                <li>Загрузить аватарку</li>
+                <li>Добавить информацию о себе</li>
+                <li>Просмотреть свои вопросы и ответы</li>
+            </ul>
+        </div>
+
+        <div class="help-block">
+            <h2>⚡ Правила сообщества</h2>
+            <p>Пожалуйста, ознакомьтесь с <a href="{{ url_for('rules') }}">правилами сообщества</a> перед началом использования платформы.</p>
+        </div>
+    </div>
+</div>
+
+<style>
+    .help-page {
+        max-width: 1000px;
+        margin: 40px auto;
+        background: white;
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
+    .help-hero {
+        background: linear-gradient(90deg, #283f80 0%, #0b9cb5 100%);
+        color: white;
+        padding: 50px 30px;
+        text-align: center;
+    }
+    .help-hero h1 {
+        font-size: 42px;
+        margin-bottom: 15px;
+    }
+    .help-hero p {
+        font-size: 20px;
+        opacity: 0.9;
+    }
+    .help-content {
+        padding: 40px 30px;
+    }
+    .help-block {
+        margin-bottom: 40px;
+    }
+    .help-block h2 {
+        color: #1a3a6e;
+        font-size: 28px;
+        margin-bottom: 15px;
+        border-left: 5px solid #0b9cb5;
+        padding-left: 20px;
+    }
+    .help-block p {
+        font-size: 16px;
+        line-height: 1.6;
+        color: #334155;
+        margin: 12px 0;
+    }
+    .help-block ul {
+        margin: 12px 0 12px 25px;
+        color: #334155;
+        line-height: 1.6;
+    }
+    .help-block li {
+        margin: 6px 0;
+    }
+    .help-block code {
+        background: #f1f5f9;
+        padding: 2px 6px;
+        border-radius: 6px;
+        font-family: monospace;
+        font-size: 14px;
+        color: #0b9cb5;
+    }
+    .help-block a {
+        color: #0b9cb5;
+        text-decoration: none;
+    }
+    .help-block a:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}

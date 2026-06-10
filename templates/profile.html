@@ -7,15 +7,26 @@
             {% if user.avatar %}
                 <img src="{{ url_for('static', filename='avatars/' + user.avatar) }}" alt="avatar">
             {% else %}
-                <div class="avatar-placeholder">{{ (user.nickname or user.email)[0]|upper }}</div>
+                <div class="avatar-placeholder">{{ user.nickname[0]|upper if user.nickname else '?' }}</div>
             {% endif %}
         </div>
         <div class="profile-info">
-            <h1>{{ user.nickname or user.email }}</h1>
-            <p>Email: {{ user.email }}</p>
-            <p>На сайте с: {{ user.created_at[:10] }}</p>
+            <h1>{{ user.nickname }}</h1>
+            {% if show_email %}
+                <p class="profile-email"><i class="fas fa-envelope"></i> {{ show_email }}</p>
+            {% endif %}
+            <p class="profile-bio">
+                {% if user.bio %}
+                    {{ user.bio }}
+                {% else %}
+                    <span class="bio-placeholder">Информация о себе пока не добавлена</span>
+                {% endif %}
+            </p>
+            <p class="profile-joined"><i class="fas fa-calendar-alt"></i> На сайте с: {{ user.created_at[:10] }}</p>
             {% if user_id == user.id %}
-                <a href="{{ url_for('edit_profile') }}" class="btn-small">Редактировать профиль</a>
+                <a href="{{ url_for('edit_profile') }}" class="btn-small edit-profile-btn">
+                    <i class="fas fa-edit"></i> Редактировать профиль
+                </a>
             {% endif %}
         </div>
     </div>
@@ -31,7 +42,7 @@
                 <div class="question-date">{{ q.created_at[:16] }}</div>
             </div>
         {% else %}
-            <p>Нет вопросов.</p>
+            <p class="empty-message">Нет вопросов.</p>
         {% endfor %}
     </div>
     <div id="answers-tab" class="tab-content">
@@ -43,7 +54,7 @@
                 <div class="answer-date">{{ a.created_at[:16] }}</div>
             </div>
         {% else %}
-            <p>Нет ответов.</p>
+            <p class="empty-message">Нет ответов.</p>
         {% endfor %}
     </div>
 </div>
@@ -58,4 +69,143 @@
         });
     });
 </script>
+
+<style>
+    .profile-container {
+        max-width: 1000px;
+        margin: 30px auto;
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .profile-header {
+        display: flex;
+        gap: 30px;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        padding-bottom: 25px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .profile-avatar img, .avatar-placeholder {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+    .avatar-placeholder {
+        background: linear-gradient(135deg, #28b8d5, #1689a7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 48px;
+        color: white;
+    }
+    .profile-info {
+        flex: 1;
+    }
+    .profile-info h1 {
+        color: #1a3a6e;
+        font-size: 28px;
+        margin-bottom: 10px;
+    }
+    .profile-email {
+        color: #64748b;
+        font-size: 14px;
+        margin-bottom: 12px;
+    }
+    .profile-email i {
+        color: #0b9cb5;
+        width: 20px;
+    }
+    .profile-bio {
+        background: #f8fafc;
+        padding: 15px;
+        border-radius: 12px;
+        margin: 15px 0;
+        color: #334155;
+        line-height: 1.5;
+        font-size: 15px;
+    }
+    .bio-placeholder {
+        color: #94a3b8;
+        font-style: italic;
+    }
+    .profile-joined {
+        color: #64748b;
+        font-size: 13px;
+        margin: 10px 0;
+    }
+    .profile-joined i {
+        color: #0b9cb5;
+        width: 20px;
+    }
+    .edit-profile-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 10px;
+    }
+    .profile-tabs {
+        display: flex;
+        gap: 30px;
+        margin: 25px 0 20px;
+        border-bottom: 2px solid #e2e8f0;
+    }
+    .tab {
+        padding: 10px 0;
+        cursor: pointer;
+        font-weight: 500;
+        color: #64748b;
+        transition: color 0.2s;
+    }
+    .tab.active {
+        color: #0b9cb5;
+        border-bottom: 3px solid #0b9cb5;
+    }
+    .tab:hover {
+        color: #1a3a6e;
+    }
+    .tab-content {
+        display: none;
+    }
+    .tab-content.active {
+        display: block;
+    }
+    .question-item, .answer-item {
+        padding: 18px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .question-item:last-child, .answer-item:last-child {
+        border-bottom: none;
+    }
+    .question-stats, .answer-stats {
+        font-size: 13px;
+        color: #64748b;
+        margin-bottom: 8px;
+    }
+    .question-title a {
+        font-size: 18px;
+        font-weight: 500;
+        color: #1a3a6e;
+        text-decoration: none;
+    }
+    .question-title a:hover {
+        color: #0b9cb5;
+    }
+    .answer-preview {
+        font-size: 14px;
+        color: #475569;
+        margin: 8px 0;
+    }
+    .question-date, .answer-date {
+        font-size: 12px;
+        color: #94a3b8;
+    }
+    .empty-message {
+        text-align: center;
+        color: #94a3b8;
+        padding: 30px;
+    }
+</style>
 {% endblock %}

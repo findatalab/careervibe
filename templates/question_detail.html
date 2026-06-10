@@ -6,7 +6,7 @@
         <h1>{{ question.title }}</h1>
         <div class="question-meta">
             <span>Задан: {{ question.created_at[:16] }}</span>
-            <span>Автор: <a href="{{ url_for('profile', user_id=question.user_id) }}">{{ question.nickname or question.email }}</a></span>
+            <span>Автор: <a href="{{ url_for('profile', user_id=question.user_id) }}">{{ question.nickname }}</a></span>
             <span>Просмотров: {{ question.views }}</span>
             <span>Голосов: {{ question.votes }}</span>
         </div>
@@ -14,12 +14,12 @@
 
     <div class="question-content">
         <div class="voting">
-            <button class="vote-up" data-type="question" data-id="{{ question.id }}">▲</button>
+            <button class="vote-up {% if user_vote == 1 %}active{% endif %}" data-type="question" data-id="{{ question.id }}">▲</button>
             <span class="vote-count" id="question-votes-{{ question.id }}">{{ question.votes }}</span>
-            <button class="vote-down" data-type="question" data-id="{{ question.id }}">▼</button>
+            <button class="vote-down {% if user_vote == -1 %}active{% endif %}" data-type="question" data-id="{{ question.id }}">▼</button>
         </div>
         <div class="question-text">
-            <p>{{ question.content|replace('\n', '<br>')|safe }}</p>
+            <div class="markdown-content">{{ question.content_html|safe }}</div>
             {% if tags %}
                 <div class="question-tags">
                     {% for tag in tags %}
@@ -27,6 +27,46 @@
                     {% endfor %}
                 </div>
             {% endif %}
+
+            <!-- Вложения вопроса -->
+            {% if attachments %}
+                <div class="attachments-list">
+                    {% for file in attachments %}
+                        <div class="attachment-item" data-id="{{ file.id }}">
+                            {% set ext = file.original_filename.split('.')[-1].lower() %}
+                            {% if ext in ['png', 'jpg', 'jpeg', 'gif', 'webp'] %}
+                                <div class="attachment-image">
+                                    <img src="{{ url_for('uploaded_file', filename=file.filepath) }}" alt="{{ file.original_filename }}" class="attachment-img" onclick="openModal(this.src)">
+                                </div>
+                            {% elif ext in ['mp4', 'webm', 'mov', 'avi'] %}
+                                <div class="attachment-video">
+                                    <video controls class="attachment-video-player">
+                                        <source src="{{ url_for('uploaded_file', filename=file.filepath) }}" type="video/{{ ext }}">
+                                        Ваш браузер не поддерживает видео.
+                                    </video>
+                                </div>
+                            {% elif ext in ['mp3', 'wav', 'ogg'] %}
+                                <div class="attachment-audio">
+                                    <audio controls class="attachment-audio-player">
+                                        <source src="{{ url_for('uploaded_file', filename=file.filepath) }}" type="audio/{{ ext }}">
+                                        Ваш браузер не поддерживает аудио.
+                                    </audio>
+                                </div>
+                            {% else %}
+                                <div class="attachment-file">
+                                    <a href="{{ url_for('uploaded_file', filename=file.filepath) }}" class="attachment-link" download>
+                                        📎 {{ file.original_filename }}
+                                    </a>
+                                </div>
+                            {% endif %}
+                            {% if user_id == question.user_id %}
+                                <button class="delete-attachment-btn" data-id="{{ file.id }}" data-type="question">🗑️</button>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
             {% if user_id == question.user_id %}
                 <div class="question-actions">
                     <a href="{{ url_for('edit_question', question_id=question.id) }}" class="btn-small">Редактировать</a>
@@ -38,20 +78,66 @@
         </div>
     </div>
 
-    <!-- Ответы -->
     <div class="answers-section">
         <h2>{{ answers|length }} ответа</h2>
-        {% for answer in answers %}
+        {% macro render_answer(answer, level=0) %}
             <div class="answer-card {% if answer.is_best %}best-answer{% endif %}" id="answer-{{ answer.id }}">
+                <div class="answer-avatar">
+                    <a href="{{ url_for('profile', user_id=answer.user_id) }}" class="answer-avatar-link">
+                        {% if answer.avatar %}
+                            <img src="{{ url_for('static', filename='avatars/' + answer.avatar) }}" class="answer-avatar-img" alt="avatar">
+                        {% else %}
+                            <div class="answer-avatar-placeholder">{{ (answer.nickname|string)[0]|upper if answer.nickname else '?' }}</div>
+                        {% endif %}
+                    </a>
+                </div>
                 <div class="voting">
-                    <button class="vote-up" data-type="answer" data-id="{{ answer.id }}">▲</button>
+                    <button class="vote-up {% if user_votes_for_answers.get(answer.id) == 1 %}active{% endif %}" data-type="answer" data-id="{{ answer.id }}">▲</button>
                     <span class="vote-count" id="answer-votes-{{ answer.id }}">{{ answer.votes }}</span>
-                    <button class="vote-down" data-type="answer" data-id="{{ answer.id }}">▼</button>
+                    <button class="vote-down {% if user_votes_for_answers.get(answer.id) == -1 %}active{% endif %}" data-type="answer" data-id="{{ answer.id }}">▼</button>
                 </div>
                 <div class="answer-content">
-                    <p>{{ answer.content|replace('\n', '<br>')|safe }}</p>
+                    <div class="markdown-content">{{ answer.content_html|safe }}</div>
+
+                    <!-- Вложения ответа -->
+                    {% if answer.attachments %}
+                        <div class="attachments-list">
+                            {% for file in answer.attachments %}
+                                <div class="attachment-item" data-id="{{ file.id }}">
+                                    {% set ext = file.original_filename.split('.')[-1].lower() %}
+                                    {% if ext in ['png', 'jpg', 'jpeg', 'gif', 'webp'] %}
+                                        <div class="attachment-image">
+                                            <img src="{{ url_for('uploaded_file', filename=file.filepath) }}" alt="{{ file.original_filename }}" class="attachment-img" onclick="openModal(this.src)">
+                                        </div>
+                                    {% elif ext in ['mp4', 'webm', 'mov', 'avi'] %}
+                                        <div class="attachment-video">
+                                            <video controls class="attachment-video-player">
+                                                <source src="{{ url_for('uploaded_file', filename=file.filepath) }}" type="video/{{ ext }}">
+                                            </video>
+                                        </div>
+                                    {% elif ext in ['mp3', 'wav', 'ogg'] %}
+                                        <div class="attachment-audio">
+                                            <audio controls class="attachment-audio-player">
+                                                <source src="{{ url_for('uploaded_file', filename=file.filepath) }}" type="audio/{{ ext }}">
+                                            </audio>
+                                        </div>
+                                    {% else %}
+                                        <div class="attachment-file">
+                                            <a href="{{ url_for('uploaded_file', filename=file.filepath) }}" class="attachment-link" download>
+                                                📎 {{ file.original_filename }}
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                    {% if user_id == answer.user_id %}
+                                        <button class="delete-attachment-btn" data-id="{{ file.id }}" data-type="answer">🗑️</button>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
                     <div class="answer-meta">
-                        <span>Ответил: <a href="{{ url_for('profile', user_id=answer.user_id) }}">{{ answer.nickname or answer.email }}</a></span>
+                        <span>Ответил: <a href="{{ url_for('profile', user_id=answer.user_id) }}">{{ answer.nickname }}</a></span>
                         <span>{{ answer.created_at[:16] }}</span>
                         {% if answer.is_best %}
                             <span class="best-badge">★ Лучший ответ</span>
@@ -66,21 +152,58 @@
                         </div>
                     {% endif %}
                     {% if user_id == question.user_id and not answer.is_best %}
-                        <form method="post" action="{{ url_for('mark_best_answer', answer_id=answer.id) }}" style="margin-top:10px;">
+                        <form method="post" action="{{ url_for('mark_best_answer', answer_id=answer.id) }}">
                             <button type="submit" class="btn-small btn-best">Отметить как лучший</button>
                         </form>
                     {% endif %}
+
+                    <!-- Кнопка ответа на ответ -->
+                    <button class="comment-answer-btn" data-id="{{ answer.id }}">💬 Ответить</button>
+                    <div class="comment-form" id="comment-form-{{ answer.id }}" style="display:none;">
+                        <form method="post" action="{{ url_for('add_answer', question_id=question.id) }}" class="reply-form" enctype="multipart/form-data">
+                            <input type="hidden" name="parent_id" value="{{ answer.id }}">
+                            <textarea name="content" rows="3" placeholder="Напишите ответ на этот ответ..."></textarea>
+                            <div class="reply-file-upload">
+                                <input type="file" name="attachments" multiple accept=".png,.jpg,.jpeg,.gif,.pdf,.txt,.zip,.rar,.doc,.docx,.xls,.xlsx,.mp4,.webm,.mov,.avi,.mp3,.wav">
+                                <small>Можно прикрепить файлы</small>
+                            </div>
+                            <button type="submit" class="btn-small">Ответить</button>
+                        </form>
+                    </div>
+
+                    {% if answer.children %}
+                        <div class="answer-children">
+                            {% for child in answer.children %}
+                                {{ render_answer(child, level+1) }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
             </div>
+        {% endmacro %}
+
+        {% for answer in answers %}
+            {{ render_answer(answer) }}
         {% endfor %}
     </div>
 
-    <!-- Форма добавления ответа -->
     {% if user_id %}
         <div class="add-answer">
             <h3>Ваш ответ</h3>
-            <form method="post" action="{{ url_for('add_answer', question_id=question.id) }}">
-                <textarea name="content" rows="5" required placeholder="Напишите ответ..."></textarea>
+            <form method="post" id="answer-form" action="{{ url_for('add_answer', question_id=question.id) }}" enctype="multipart/form-data">
+                <textarea name="content" id="answer-content" rows="5" required placeholder="Напишите ответ..."></textarea>
+                <div class="form-group">
+                    <label>Прикрепить файлы (до 5 файлов)</label>
+                    <div class="answer-file-drop-zone" id="answer-file-drop-zone">
+                        <div class="file-drop-message">
+                            <i class="fas fa-cloud-upload-alt"></i> Перетащите файлы сюда или щёлкните для выбора
+                        </div>
+                        <input type="file" name="attachments" id="answer-file-input" multiple accept=".png,.jpg,.jpeg,.gif,.pdf,.txt,.zip,.rar,.doc,.docx,.xls,.xlsx,.mp4,.webm,.mov,.avi,.mp3,.wav" style="display: none;">
+                        <button type="button" class="btn-small" id="answer-select-files-btn">Выбрать файлы</button>
+                    </div>
+                    <div id="answer-file-list" class="file-list"></div>
+                    <small>Поддерживаются: изображения, видео, аудио, документы, архивы. Максимум 5 файлов.</small>
+                </div>
                 <button type="submit" class="btn btn-primary">Отправить ответ</button>
             </form>
         </div>
@@ -91,28 +214,300 @@
     {% endif %}
 </div>
 
+<!-- Модальное окно для просмотра изображений -->
+<div id="imageModal" class="modal">
+    <span class="modal-close">&times;</span>
+    <img class="modal-content" id="modalImg">
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+
 <script>
-// Голосование через AJAX
-document.querySelectorAll('.vote-up, .vote-down').forEach(btn => {
-    btn.addEventListener('click', async function() {
-        const type = this.dataset.type;
-        const id = this.dataset.id;
-        const voteType = this.classList.contains('vote-up') ? 'up' : 'down';
-
-        const response = await fetch(`/${type}/${id}/vote`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `vote_type=${voteType}`
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            const voteSpan = document.getElementById(`${type}-votes-${id}`);
-            if (voteSpan) voteSpan.textContent = data.votes;
-        } else {
-            alert('Ошибка голосования. Возможно, требуется авторизация.');
-        }
+    renderMathInElement(document.body, {
+        delimiters: [
+            {left: '$$', right: '$$', display: true},
+            {left: '$', right: '$', display: false}
+        ],
+        throwOnError: false
     });
-});
+
+    // Голосование
+    document.querySelectorAll('.vote-up, .vote-down').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const type = this.dataset.type;
+            const id = this.dataset.id;
+            const voteType = this.classList.contains('vote-up') ? 'up' : 'down';
+            const response = await fetch(`/${type}/${id}/vote`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `vote_type=${voteType}`
+            });
+            if (response.ok) {
+                const data = await response.json();
+                const voteSpan = document.getElementById(`${type}-votes-${id}`);
+                if (voteSpan) voteSpan.textContent = data.votes;
+                const container = this.closest('.voting');
+                const upBtn = container.querySelector('.vote-up');
+                const downBtn = container.querySelector('.vote-down');
+                upBtn.classList.remove('active');
+                downBtn.classList.remove('active');
+                if (data.user_vote === 1) upBtn.classList.add('active');
+                else if (data.user_vote === -1) downBtn.classList.add('active');
+            } else {
+                alert('Ошибка голосования.');
+            }
+        });
+    });
+
+    // Показать/скрыть форму ответа на ответ
+    document.querySelectorAll('.comment-answer-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = this.dataset.id;
+            const formDiv = document.getElementById(`comment-form-${id}`);
+            if (formDiv.style.display === 'none') {
+                formDiv.style.display = 'block';
+            } else {
+                formDiv.style.display = 'none';
+            }
+        });
+    });
+
+    // Модальное окно для изображений
+    function openModal(src) {
+        const modal = document.getElementById('imageModal');
+        const modalImg = document.getElementById('modalImg');
+        modal.style.display = 'block';
+        modalImg.src = src;
+    }
+    document.querySelector('.modal-close')?.addEventListener('click', function() {
+        document.getElementById('imageModal').style.display = 'none';
+    });
+    window.addEventListener('click', function(e) {
+        const modal = document.getElementById('imageModal');
+        if (e.target === modal) modal.style.display = 'none';
+    });
+
+    // Удаление вложений
+    async function deleteAttachment(attachmentId, element) {
+        if (!confirm('Удалить этот файл?')) return;
+        const response = await fetch(`/attachment/${attachmentId}/delete`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        if (response.ok) {
+            element.remove();
+        } else {
+            alert('Ошибка при удалении файла');
+        }
+    }
+    document.querySelectorAll('.delete-attachment-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = this.dataset.id;
+            deleteAttachment(id, this.closest('.attachment-item'));
+        });
+    });
+
+    // Управление файлами для ответа
+    let answerSelectedFiles = [];
+    function updateAnswerFileList() {
+        const container = document.getElementById('answer-file-list');
+        const fileInput = document.getElementById('answer-file-input');
+        if (!container) return;
+        container.innerHTML = '';
+        answerSelectedFiles.forEach((file, idx) => {
+            const div = document.createElement('div');
+            div.className = 'file-item';
+            div.innerHTML = `
+                <i class="fas fa-paperclip"></i>
+                <span>${file.name.length > 30 ? file.name.substring(0,27)+'...' : file.name}</span>
+                <span class="remove-file" data-idx="${idx}">✖</span>
+            `;
+            container.appendChild(div);
+        });
+        const dt = new DataTransfer();
+        answerSelectedFiles.forEach(f => dt.items.add(f));
+        fileInput.files = dt.files;
+        document.querySelectorAll('#answer-file-list .remove-file').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(btn.dataset.idx);
+                answerSelectedFiles.splice(idx, 1);
+                updateAnswerFileList();
+            });
+        });
+    }
+    function initAnswerFileUpload() {
+        const dropZone = document.getElementById('answer-file-drop-zone');
+        const fileInput = document.getElementById('answer-file-input');
+        const selectBtn = document.getElementById('answer-select-files-btn');
+        if (!dropZone) return;
+        dropZone.addEventListener('click', () => fileInput.click());
+        selectBtn?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            fileInput.click();
+        });
+        fileInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            if (answerSelectedFiles.length + files.length > 5) {
+                alert('Максимум 5 файлов');
+                return;
+            }
+            files.forEach(f => {
+                if (!answerSelectedFiles.some(ex => ex.name === f.name && ex.size === f.size)) {
+                    answerSelectedFiles.push(f);
+                }
+            });
+            updateAnswerFileList();
+        });
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('drag-over');
+        });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            const files = Array.from(e.dataTransfer.files);
+            if (answerSelectedFiles.length + files.length > 5) {
+                alert('Максимум 5 файлов');
+                return;
+            }
+            files.forEach(f => {
+                if (!answerSelectedFiles.some(ex => ex.name === f.name && ex.size === f.size)) {
+                    answerSelectedFiles.push(f);
+                }
+            });
+            updateAnswerFileList();
+        });
+    }
+    initAnswerFileUpload();
 </script>
+
+{% if user_id %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.css">
+<script src="https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.js"></script>
+<style>
+    .EasyMDEContainer .editor-toolbar button:first-child,
+    .EasyMDEContainer .editor-toolbar button:nth-child(2) {
+        display: none !important;
+    }
+</style>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const textarea = document.getElementById('answer-content');
+        if (!textarea) return;
+        const easyMDE = new EasyMDE({
+            element: textarea,
+            spellChecker: false,
+            autoDownloadFontAwesome: true,
+            forceSync: true,
+            renderingConfig: {
+                singleLineBreaks: false,
+                codeSyntaxHighlighting: true,
+            },
+            previewRender: function(plainText) {
+                const html = marked.parse(plainText);
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = html;
+                renderMathInElement(tempDiv, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false}
+                    ],
+                    throwOnError: false
+                });
+                return tempDiv.innerHTML;
+            }
+        });
+        const form = document.getElementById('answer-form');
+        form.addEventListener('submit', function(e) {
+            const content = easyMDE.value().trim();
+            if (!content) {
+                alert('Текст ответа не может быть пустым.');
+                e.preventDefault();
+                return false;
+            }
+            textarea.value = content;
+            return true;
+        });
+    });
+</script>
+{% endif %}
+
+<style>
+    .attachment-item {
+        display: inline-block;
+        margin: 5px;
+        position: relative;
+    }
+    .attachment-img {
+        max-width: 150px;
+        max-height: 150px;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+    .attachment-video-player, .attachment-audio-player {
+        max-width: 300px;
+        border-radius: 8px;
+    }
+    .delete-attachment-btn {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: #ef4444;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        cursor: pointer;
+        font-size: 12px;
+    }
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 2000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.9);
+    }
+    .modal-content {
+        margin: auto;
+        display: block;
+        max-width: 90%;
+        max-height: 90%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+    .modal-close {
+        position: absolute;
+        top: 20px;
+        right: 35px;
+        color: #fff;
+        font-size: 40px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    .answer-file-drop-zone {
+        border: 2px dashed #cbd5e1;
+        border-radius: 12px;
+        padding: 15px;
+        text-align: center;
+        background: #f8fafc;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+    .answer-file-drop-zone.drag-over {
+        border-color: #0b9cb5;
+        background: #e0f2fe;
+    }
+</style>
 {% endblock %}

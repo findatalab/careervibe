@@ -35,10 +35,10 @@
                             {% if user_avatar %}
                                 <img src="{{ url_for('static', filename='avatars/' + user_avatar) }}" class="user-avatar-img" alt="avatar">
                             {% else %}
-                                <div class="user-avatar">{{ (user_nickname or user_email)[0]|upper }}</div>
+                                <div class="user-avatar">{{ user_nickname[0]|upper if user_nickname else '?' }}</div>
                             {% endif %}
                         </a>
-                        <a href="{{ url_for('profile', user_id=user_id) }}" class="user-name">{{ user_nickname or user_email }}</a>
+                        <a href="{{ url_for('profile', user_id=user_id) }}" class="user-name">{{ user_nickname }}</a>
                         <a href="{{ url_for('ask_question') }}" class="btn-ask-header">Задать вопрос</a>
                         <a href="{{ url_for('logout') }}" class="logout-btn">Выйти</a>
                     </div>
@@ -66,9 +66,9 @@
                 </div>
                 <div class="burger-menu-section">
                     <h4>Информация</h4>
-                    <a href="#">Помощь</a>
-                    <a href="#">Правила сообщества</a>
-                    <a href="#">Контакты</a>
+                    <a href="{{ url_for('help_page') }}">Помощь</a>
+                    <a href="{{ url_for('rules') }}">Правила сообщества</a>
+                    <a href="{{ url_for('contacts') }}">Контакты</a>
                 </div>
             </div>
         </div>
@@ -95,7 +95,7 @@
         <div class="footer-inner">
             <div class="footer-col">
                 <h4>О нас</h4>
-                <a href="#">Миссия</a>
+                <a href="{{ url_for('mission') }}">Миссия</a>
                 <a href="#">Наше влияние</a>
                 <a href="#">Команда</a>
                 <a href="#">Найм</a>
@@ -113,7 +113,7 @@
             <div class="footer-col">
                 <h4>Более</h4>
                 <a href="#">Ресурсы для карьеры</a>
-                <a href="#">Правила сообщества</a>
+                <a href="{{ url_for('rules') }}">Правила сообщества</a>
                 <a href="#">Условия использования</a>
                 <a href="#">Политика конфиденциальности</a>
             </div>

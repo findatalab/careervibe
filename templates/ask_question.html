@@ -3,14 +3,14 @@
 {% block content %}
 <div class="ask-question-container">
     <h1>Задать новый вопрос</h1>
-    <form method="post" class="ask-form" id="ask-form">
+    <form method="post" class="ask-form" id="ask-form" enctype="multipart/form-data">
         <div class="form-group">
             <label for="title">Заголовок</label>
             <input type="text" id="title" name="title" required placeholder="Кратко опишите суть вопроса">
         </div>
         <div class="form-group">
-            <label for="content">Текст вопроса</label>
-            <textarea id="content" name="content" rows="8" required placeholder="Подробно опишите вашу ситуацию..."></textarea>
+            <label for="content">Текст вопроса (Markdown + LaTeX)</label>
+            <textarea id="content" name="content" rows="10" required placeholder="Подробно опишите вашу ситуацию..."></textarea>
         </div>
         <div class="form-group">
             <label>Теги (через запятую)</label>
@@ -19,14 +19,92 @@
                 <input type="text" id="tags-input" class="tags-input" placeholder="введите тег и нажмите запятую или Enter">
             </div>
             <input type="hidden" id="tags-hidden" name="tags">
-            <small>Максимум 7 тегов, каждый до 20 символов. Нажмите запятую или Enter для добавления.</small>
+            <small>Максимум 7 тегов, каждый до 20 символов. Не используйте # в начале.</small>
         </div>
+
+        <!-- БЛОК ЗАГРУЗКИ ФАЙЛОВ (с предпросмотром и удалением) -->
+        <div class="form-group">
+            <label>Прикрепить файлы (до 5 файлов)</label>
+            <div class="file-drop-zone" id="file-drop-zone">
+                <div class="file-drop-message">
+                    <i class="fas fa-cloud-upload-alt"></i> Перетащите файлы сюда или щёлкните для выбора
+                </div>
+                <input type="file" name="attachments" id="file-input" multiple accept=".png,.jpg,.jpeg,.gif,.pdf,.txt,.zip,.rar,.doc,.docx,.xls,.xlsx,.mp4,.webm,.mov,.avi,.mp3,.wav" style="display: none;">
+                <button type="button" class="btn-small" id="select-files-btn">Выбрать файлы</button>
+            </div>
+            <div id="file-list" class="file-list"></div>
+            <small>Поддерживаются: изображения, видео, аудио, документы, архивы. Максимум 5 файлов.</small>
+        </div>
+
         <div class="form-actions">
             <button type="submit" class="btn btn-primary">Опубликовать вопрос</button>
             <a href="{{ url_for('index') }}" class="btn btn-secondary">Отмена</a>
         </div>
     </form>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.css">
+<script src="https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<style>
+    .EasyMDEContainer .editor-toolbar button:first-child,
+    .EasyMDEContainer .editor-toolbar button:nth-child(2) {
+        display: none !important;
+    }
+    .file-drop-zone {
+        border: 2px dashed #cbd5e1;
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        background: #f8fafc;
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+    .file-drop-zone.drag-over {
+        border-color: #0b9cb5;
+        background: #e0f2fe;
+    }
+    .file-drop-message i {
+        font-size: 32px;
+        color: #0b9cb5;
+        margin-bottom: 8px;
+        display: block;
+    }
+    .file-list {
+        margin-top: 12px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .file-item {
+        background: #f1f5f9;
+        border-radius: 20px;
+        padding: 4px 12px 4px 8px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+    }
+    .file-item .remove-file {
+        cursor: pointer;
+        color: #ef4444;
+        font-weight: bold;
+        margin-left: 4px;
+    }
+    .file-item .remove-file:hover {
+        color: #dc2626;
+    }
+    .tag-input-disabled {
+        background-color: #f3f4f6;
+        color: #9ca3af;
+        cursor: not-allowed;
+    }
+</style>
 
 <script>
     class TagsInput {
@@ -40,19 +118,18 @@
             this.tags = [];
             this.init();
         }
-
         init() {
             this.textInput.addEventListener('keydown', (e) => this.handleKeyDown(e));
             this.textInput.addEventListener('blur', () => this.addCurrentTag());
+            this.updateInputState();
         }
-
         showToast(message, type = 'error') {
-            const toastContainer = document.getElementById('toast-container');
-            if (toastContainer) {
+            const container = document.getElementById('toast-container');
+            if (container) {
                 const toast = document.createElement('div');
                 toast.className = `toast toast-${type}`;
                 toast.textContent = message;
-                toastContainer.appendChild(toast);
+                container.appendChild(toast);
                 setTimeout(() => toast.classList.add('show'), 10);
                 setTimeout(() => {
                     toast.classList.remove('show');
@@ -62,25 +139,26 @@
                 alert(message);
             }
         }
-
         validateTag(tag) {
             if (!tag) return false;
+            if (tag.startsWith('#')) tag = tag.substring(1);
+            tag = tag.trim().toLowerCase();
             if (this.tags.includes(tag)) {
-                this.showToast(`❌ Тег "${tag}" уже добавлен.`);
+                this.showToast(`Тег "${tag}" уже добавлен.`);
                 return false;
             }
             if (tag.length > this.maxTagLength) {
-                this.showToast(`❌ Тег "${tag}" длиннее ${this.maxTagLength} символов.`);
+                this.showToast(`Тег "${tag}" длиннее ${this.maxTagLength} символов.`);
                 return false;
             }
             if (this.tags.length >= this.maxTags) {
-                this.showToast(`❌ Нельзя добавить больше ${this.maxTags} тегов.`);
+                this.showToast(`Нельзя добавить больше ${this.maxTags} тегов.`);
                 return false;
             }
             return true;
         }
-
         addTag(tag) {
+            if (tag.startsWith('#')) tag = tag.substring(1);
             tag = tag.trim().toLowerCase();
             if (!tag) return false;
             if (!this.validateTag(tag)) return false;
@@ -88,20 +166,19 @@
             this.render();
             this.textInput.value = '';
             this.updateHiddenInput();
+            this.updateInputState();
             return true;
         }
-
         removeTag(index) {
             this.tags.splice(index, 1);
             this.render();
             this.updateHiddenInput();
+            this.updateInputState();
         }
-
         addCurrentTag() {
-            const tag = this.textInput.value.trim();
+            let tag = this.textInput.value.trim();
             if (tag) this.addTag(tag);
         }
-
         handleKeyDown(e) {
             if (e.key === ',' || e.key === 'Enter') {
                 e.preventDefault();
@@ -110,7 +187,6 @@
                 this.removeTag(this.tags.length - 1);
             }
         }
-
         render() {
             this.tagsList.innerHTML = '';
             this.tags.forEach((tag, index) => {
@@ -126,26 +202,159 @@
                 });
             });
         }
-
         updateHiddenInput() {
             this.hiddenInput.value = this.tags.join(',');
         }
-
         getTags() {
             return this.tags;
         }
+        updateInputState() {
+            if (this.tags.length >= this.maxTags) {
+                this.textInput.disabled = true;
+                this.textInput.classList.add('tag-input-disabled');
+                this.textInput.placeholder = 'Достигнут лимит тегов';
+            } else {
+                this.textInput.disabled = false;
+                this.textInput.classList.remove('tag-input-disabled');
+                this.textInput.placeholder = 'введите тег и нажмите запятую или Enter';
+            }
+        }
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
+    // Управление файлами
+    let selectedFiles = [];
+
+    function updateFileList() {
+        const container = document.getElementById('file-list');
+        const fileInput = document.getElementById('file-input');
+        container.innerHTML = '';
+        selectedFiles.forEach((file, idx) => {
+            const div = document.createElement('div');
+            div.className = 'file-item';
+            div.innerHTML = `
+                <i class="fas fa-paperclip"></i>
+                <span>${file.name.length > 30 ? file.name.substring(0,27)+'...' : file.name}</span>
+                <span class="remove-file" data-idx="${idx}">✖</span>
+            `;
+            container.appendChild(div);
+        });
+        const dt = new DataTransfer();
+        selectedFiles.forEach(f => dt.items.add(f));
+        fileInput.files = dt.files;
+        document.querySelectorAll('#file-list .remove-file').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(btn.dataset.idx);
+                selectedFiles.splice(idx, 1);
+                updateFileList();
+            });
+        });
+    }
+
+    function initFileUpload() {
+        const dropZone = document.getElementById('file-drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const selectBtn = document.getElementById('select-files-btn');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+        selectBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            if (selectedFiles.length + files.length > 5) {
+                alert('Максимум 5 файлов');
+                return;
+            }
+            files.forEach(f => {
+                if (!selectedFiles.some(ex => ex.name === f.name && ex.size === f.size)) {
+                    selectedFiles.push(f);
+                }
+            });
+            updateFileList();
+        });
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('drag-over');
+        });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            const files = Array.from(e.dataTransfer.files);
+            if (selectedFiles.length + files.length > 5) {
+                alert('Максимум 5 файлов');
+                return;
+            }
+            files.forEach(f => {
+                if (!selectedFiles.some(ex => ex.name === f.name && ex.size === f.size)) {
+                    selectedFiles.push(f);
+                }
+            });
+            updateFileList();
+        });
+    }
+
+    function initAskEditor() {
+        const textarea = document.getElementById('content');
+        if (!textarea) return;
+
+        const easyMDE = new EasyMDE({
+            element: textarea,
+            spellChecker: false,
+            autoDownloadFontAwesome: true,
+            forceSync: true,
+            renderingConfig: {
+                singleLineBreaks: false,
+                codeSyntaxHighlighting: true,
+            },
+            previewRender: function(plainText) {
+                const html = marked.parse(plainText);
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = html;
+                renderMathInElement(tempDiv, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false}
+                    ],
+                    throwOnError: false
+                });
+                return tempDiv.innerHTML;
+            }
+        });
+
         const tagsInput = new TagsInput('tags-container', 'tags-hidden', 7, 20);
-        document.getElementById('ask-form').addEventListener('submit', function(e) {
-            if (tagsInput.getTags().length > 7) {
-                tagsInput.showToast('❌ Нельзя добавить больше 7 тегов.');
+        const form = document.getElementById('ask-form');
+
+        form.addEventListener('submit', function(e) {
+            const title = document.getElementById('title').value.trim();
+            const content = easyMDE.value().trim();
+
+            if (!title || !content) {
+                tagsInput.showToast('Заголовок и текст вопроса не могут быть пустыми.', 'error');
                 e.preventDefault();
                 return false;
             }
+            if (tagsInput.getTags().length > 7) {
+                tagsInput.showToast('Нельзя добавить больше 7 тегов.', 'error');
+                e.preventDefault();
+                return false;
+            }
+            textarea.value = content;
             return true;
         });
-    });
+
+        initFileUpload();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initAskEditor);
+    } else {
+        initAskEditor();
+    }
 </script>
 {% endblock %}

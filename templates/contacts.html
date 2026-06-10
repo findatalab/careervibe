@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="contacts-page">
+    <div class="contacts-hero">
+        <h1>Контакты</h1>
+        <p>Свяжитесь с нами — мы всегда рады помочь</p>
+    </div>
+
+    <div class="contacts-content">
+        <div class="contacts-block">
+            <h2>👨‍💻 Разработчик</h2>
+            <div class="developer-info">
+                <div class="avatar-large">
+                    <i class="fas fa-code"></i>
+                </div>
+                <h3>Y-deva</h3>
+                <p>Full-stack разработчик, создатель CareerVibe</p>
+                <a href="https://github.com/Y-deva" target="_blank" rel="noopener noreferrer" class="github-link">
+                    <i class="fab fa-github"></i> github.com/Y-deva
+                </a>
+            </div>
+        </div>
+
+        <div class="contacts-block">
+            <h2>🏫 Университетская лаборатория</h2>
+            <div class="lab-info">
+                <div class="avatar-large">
+                    <i class="fas fa-flask"></i>
+                </div>
+                <h3>Find a Talab</h3>
+                <p>Лаборатория исследований в области IT и карьерного развития</p>
+                <a href="https://github.com/findatalab" target="_blank" rel="noopener noreferrer" class="github-link">
+                    <i class="fab fa-github"></i> github.com/findatalab
+                </a>
+            </div>
+        </div>
+
+        <div class="contacts-block">
+            <h2>📧 Связь с нами</h2>
+            <div class="contact-info">
+                <p><i class="fas fa-envelope"></i> <strong>Email:</strong> support@careervibe.ru</p>
+                <p><i class="fab fa-telegram"></i> <strong>Telegram:</strong> @careervibe_support</p>
+                <p><i class="fab fa-discord"></i> <strong>Discord:</strong> CareerVibe Community</p>
+                <p><i class="fas fa-clock"></i> <strong>Время ответа:</strong> В рабочие дни 10:00–19:00 (МСК)</p>
+            </div>
+        </div>
+
+        <div class="contacts-block">
+            <h2>🐛 Сообщить о проблеме</h2>
+            <div class="report-info">
+                <p>Нашли баг или ошибку на сайте? Создайте issue на GitHub:</p>
+                <a href="https://github.com/Y-deva/careervibe/issues" target="_blank" rel="noopener noreferrer" class="report-link">
+                    <i class="fab fa-github"></i> Создать issue
+                </a>
+                <p class="small">Или напишите нам на email с подробным описанием проблемы.</p>
+            </div>
+        </div>
+
+        <div class="contacts-block">
+            <h2>🤝 Партнёрство и сотрудничество</h2>
+            <div class="partnership-info">
+                <p>По вопросам партнёрства, рекламы и сотрудничества:</p>
+                <p><i class="fas fa-envelope"></i> <strong>partners@careervibe.ru</strong></p>
+                <p><i class="fab fa-linkedin"></i> <strong>LinkedIn:</strong> CareerVibe</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="contacts-footer">
+        <p>© 2026 CareerVibe — карьерный нетворкинг</p>
+        <p>
+            <a href="{{ url_for('mission') }}">О проекте</a> |
+            <a href="{{ url_for('help_page') }}">Помощь</a> |
+            <a href="{{ url_for('rules') }}">Правила</a>
+        </p>
+    </div>
+</div>
+
+<style>
+    .contacts-page {
+        max-width: 1000px;
+        margin: 40px auto;
+        background: white;
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
+    .contacts-hero {
+        background: linear-gradient(90deg, #283f80 0%, #0b9cb5 100%);
+        color: white;
+        padding: 50px 30px;
+        text-align: center;
+    }
+    .contacts-hero h1 {
+        font-size: 42px;
+        margin-bottom: 15px;
+    }
+    .contacts-hero p {
+        font-size: 20px;
+        opacity: 0.9;
+    }
+    .contacts-content {
+        padding: 40px 30px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+    }
+    .contacts-block {
+        background: #f8fafc;
+        border-radius: 16px;
+        padding: 25px;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .contacts-block:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+    .contacts-block h2 {
+        color: #1a3a6e;
+        font-size: 22px;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #0b9cb5;
+    }
+    .developer-info, .lab-info, .contact-info, .report-info, .partnership-info {
+        text-align: center;
+    }
+    .avatar-large {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #28b8d5, #1689a7);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+    }
+    .avatar-large i {
+        font-size: 40px;
+        color: white;
+    }
+    .contacts-block h3 {
+        color: #1a3a6e;
+        font-size: 18px;
+        margin-bottom: 8px;
+    }
+    .contacts-block p {
+        color: #475569;
+        line-height: 1.5;
+        margin: 10px 0;
+    }
+    .github-link, .report-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #24292e;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 30px;
+        text-decoration: none;
+        margin-top: 15px;
+        transition: background 0.2s, transform 0.1s;
+    }
+    .github-link:hover, .report-link:hover {
+        background: #1a1e22;
+        transform: translateY(-2px);
+    }
+    .github-link i, .report-link i {
+        font-size: 18px;
+    }
+    .contact-info i, .partnership-info i {
+        color: #0b9cb5;
+        width: 25px;
+    }
+    .small {
+        font-size: 12px;
+        color: #94a3b8;
+        margin-top: 12px;
+    }
+    .contacts-footer {
+        text-align: center;
+        padding: 25px 30px;
+        border-top: 1px solid #e2e8f0;
+        color: #64748b;
+        background: white;
+    }
+    .contacts-footer a {
+        color: #0b9cb5;
+        text-decoration: none;
+    }
+    .contacts-footer a:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}

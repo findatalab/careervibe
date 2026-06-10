@@ -1,29 +1,30 @@
 import os
 import sqlite3
 
-
-def init_db() -> None:
+def init_db():
     """
-    Создаёт папку instance и все необходимые таблицы для MVP:
-    - users (уже была)
+    Создаёт папку instance и все необходимые таблицы для CareerVibe:
+    - users (с полем bio)
     - questions
-    - answers
+    - answers (с поддержкой вложенных ответов parent_answer_id)
     - tags
     - question_tags
     - question_votes
     - answer_votes
+    - attachments (с поддержкой answer_id для файлов ответов)
     """
     os.makedirs('instance', exist_ok=True)
     conn = sqlite3.connect('instance/careervibe.db')
     cursor = conn.cursor()
 
-    # Пользователи
+    # Таблица пользователей (добавлено поле bio)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             email TEXT UNIQUE NOT NULL,
-            nickname TEXT,
+            nickname TEXT UNIQUE NOT NULL,
             avatar TEXT,
+            bio TEXT,
             password_hash TEXT NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
@@ -44,19 +45,21 @@ def init_db() -> None:
         )
     ''')
 
-    # Ответы
+    # Ответы (добавляем parent_answer_id для вложенности)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS answers (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             content TEXT NOT NULL,
             question_id INTEGER NOT NULL,
             user_id INTEGER NOT NULL,
+            parent_answer_id INTEGER,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP,
             votes INTEGER DEFAULT 0,
             is_best BOOLEAN DEFAULT 0,
             FOREIGN KEY (question_id) REFERENCES questions(id) ON DELETE CASCADE,
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (parent_answer_id) REFERENCES answers(id) ON DELETE CASCADE
         )
     ''')
 
@@ -103,10 +106,26 @@ def init_db() -> None:
         )
     ''')
 
+    # Вложения (поддержка question_id и answer_id)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS attachments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            question_id INTEGER,
+            answer_id INTEGER,
+            filename TEXT NOT NULL,
+            original_filename TEXT NOT NULL,
+            filepath TEXT NOT NULL,
+            user_id INTEGER,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (question_id) REFERENCES questions(id) ON DELETE CASCADE,
+            FOREIGN KEY (answer_id) REFERENCES answers(id) ON DELETE CASCADE,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )
+    ''')
+
     conn.commit()
     conn.close()
-    print("База данных и все таблицы успешно созданы.")
-
+    print("✅ База данных успешно создана/обновлена.")
 
 if __name__ == '__main__':
     init_db()

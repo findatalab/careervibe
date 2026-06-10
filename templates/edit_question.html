@@ -3,14 +3,14 @@
 {% block content %}
 <div class="edit-question-container">
     <h1>Редактировать вопрос</h1>
-    <form method="post" class="edit-form" id="edit-form">
+    <form method="post" class="edit-form" id="edit-form" enctype="multipart/form-data">
         <div class="form-group">
             <label for="title">Заголовок</label>
             <input type="text" id="title" name="title" value="{{ question.title }}" required>
         </div>
         <div class="form-group">
-            <label for="content">Текст вопроса</label>
-            <textarea id="content" name="content" rows="8" required>{{ question.content }}</textarea>
+            <label for="content">Текст вопроса (Markdown + LaTeX)</label>
+            <textarea id="content" name="content" rows="10" required>{{ question.content }}</textarea>
         </div>
         <div class="form-group">
             <label>Теги (через запятую)</label>
@@ -21,6 +21,37 @@
             <input type="hidden" id="tags-hidden" name="tags">
             <small>Максимум 7 тегов, каждый до 20 символов. Нажмите запятую или Enter для добавления.</small>
         </div>
+
+        <!-- Существующие вложения -->
+        {% if attachments %}
+            <div class="form-group">
+                <label>Прикреплённые файлы</label>
+                <div class="existing-attachments" id="existing-attachments">
+                    {% for file in attachments %}
+                        <div class="existing-attachment-item" data-id="{{ file.id }}">
+                            <span>📎 {{ file.original_filename }}</span>
+                            <button type="button" class="remove-existing-file" data-id="{{ file.id }}">✖</button>
+                        </div>
+                    {% endfor %}
+                </div>
+                <input type="hidden" id="deleted-attachments" name="deleted_attachments" value="">
+            </div>
+        {% endif %}
+
+        <!-- Новые файлы -->
+        <div class="form-group">
+            <label>Добавить новые файлы (до 5)</label>
+            <div class="file-drop-zone" id="file-drop-zone">
+                <div class="file-drop-message">
+                    <i class="fas fa-cloud-upload-alt"></i> Перетащите файлы сюда или щёлкните для выбора
+                </div>
+                <input type="file" name="attachments" id="file-input" multiple accept=".png,.jpg,.jpeg,.gif,.pdf,.txt,.zip,.rar,.doc,.docx,.xls,.xlsx,.mp4,.webm,.mov,.avi,.mp3,.wav" style="display: none;">
+                <button type="button" class="btn-small" id="select-files-btn">Выбрать файлы</button>
+            </div>
+            <div id="file-list" class="file-list"></div>
+            <small>Поддерживаются: изображения, видео, аудио, документы, архивы. Максимум 5 файлов.</small>
+        </div>
+
         <div class="form-actions">
             <button type="submit" class="btn btn-primary">Сохранить</button>
             <a href="{{ url_for('question_detail', question_id=question.id) }}" class="btn btn-secondary">Отмена</a>
@@ -28,7 +59,70 @@
     </form>
 </div>
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.css">
+<script src="https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<style>
+    .EasyMDEContainer .editor-toolbar button:first-child,
+    .EasyMDEContainer .editor-toolbar button:nth-child(2) {
+        display: none !important;
+    }
+    .file-drop-zone {
+        border: 2px dashed #cbd5e1;
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        background: #f8fafc;
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+    .file-drop-zone.drag-over {
+        border-color: #0b9cb5;
+        background: #e0f2fe;
+    }
+    .file-drop-message i {
+        font-size: 32px;
+        color: #0b9cb5;
+        margin-bottom: 8px;
+        display: block;
+    }
+    .file-list, .existing-attachments {
+        margin-top: 12px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .file-item, .existing-attachment-item {
+        background: #f1f5f9;
+        border-radius: 20px;
+        padding: 4px 12px 4px 8px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+    }
+    .file-item .remove-file, .existing-attachment-item .remove-existing-file {
+        cursor: pointer;
+        color: #ef4444;
+        font-weight: bold;
+        margin-left: 4px;
+        background: none;
+        border: none;
+    }
+    .tag-input-disabled {
+        background-color: #f3f4f6;
+        color: #9ca3af;
+        cursor: not-allowed;
+    }
+</style>
+
 <script>
+    // Класс для управления тегами (с блокировкой при лимите)
     class TagsInput {
         constructor(containerId, hiddenInputId, maxTags = 7, maxTagLength = 20, initialTags = []) {
             this.container = document.getElementById(containerId);
@@ -42,19 +136,18 @@
             this.render();
             this.updateHiddenInput();
         }
-
         init() {
             this.textInput.addEventListener('keydown', (e) => this.handleKeyDown(e));
             this.textInput.addEventListener('blur', () => this.addCurrentTag());
+            this.updateInputState();
         }
-
         showToast(message, type = 'error') {
-            const toastContainer = document.getElementById('toast-container');
-            if (toastContainer) {
+            const container = document.getElementById('toast-container');
+            if (container) {
                 const toast = document.createElement('div');
                 toast.className = `toast toast-${type}`;
                 toast.textContent = message;
-                toastContainer.appendChild(toast);
+                container.appendChild(toast);
                 setTimeout(() => toast.classList.add('show'), 10);
                 setTimeout(() => {
                     toast.classList.remove('show');
@@ -64,7 +157,6 @@
                 alert(message);
             }
         }
-
         validateTag(tag) {
             if (!tag) return false;
             if (this.tags.includes(tag)) {
@@ -81,7 +173,6 @@
             }
             return true;
         }
-
         addTag(tag) {
             tag = tag.trim().toLowerCase();
             if (!tag) return false;
@@ -90,20 +181,19 @@
             this.render();
             this.textInput.value = '';
             this.updateHiddenInput();
+            this.updateInputState();
             return true;
         }
-
         removeTag(index) {
             this.tags.splice(index, 1);
             this.render();
             this.updateHiddenInput();
+            this.updateInputState();
         }
-
         addCurrentTag() {
             const tag = this.textInput.value.trim();
             if (tag) this.addTag(tag);
         }
-
         handleKeyDown(e) {
             if (e.key === ',' || e.key === 'Enter') {
                 e.preventDefault();
@@ -112,7 +202,6 @@
                 this.removeTag(this.tags.length - 1);
             }
         }
-
         render() {
             this.tagsList.innerHTML = '';
             this.tags.forEach((tag, index) => {
@@ -129,26 +218,185 @@
                 });
             });
         }
-
         updateHiddenInput() {
             this.hiddenInput.value = this.tags.join(',');
         }
-
         getTags() {
             return this.tags;
         }
+        updateInputState() {
+            if (this.tags.length >= this.maxTags) {
+                this.textInput.disabled = true;
+                this.textInput.classList.add('tag-input-disabled');
+                this.textInput.placeholder = 'Достигнут лимит тегов';
+            } else {
+                this.textInput.disabled = false;
+                this.textInput.classList.remove('tag-input-disabled');
+                this.textInput.placeholder = 'введите тег и нажмите запятую или Enter';
+            }
+        }
     }
 
+    // Управление новыми файлами
+    let selectedFiles = [];
+    let deletedAttachmentIds = [];
+
+    function updateFileList() {
+        const container = document.getElementById('file-list');
+        const fileInput = document.getElementById('file-input');
+        if (!container) return;
+        container.innerHTML = '';
+        selectedFiles.forEach((file, idx) => {
+            const div = document.createElement('div');
+            div.className = 'file-item';
+            div.innerHTML = `
+                <i class="fas fa-paperclip"></i>
+                <span>${file.name.length > 30 ? file.name.substring(0,27)+'...' : file.name}</span>
+                <span class="remove-file" data-idx="${idx}">✖</span>
+            `;
+            container.appendChild(div);
+        });
+        const dt = new DataTransfer();
+        selectedFiles.forEach(f => dt.items.add(f));
+        fileInput.files = dt.files;
+        document.querySelectorAll('#file-list .remove-file').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(btn.dataset.idx);
+                selectedFiles.splice(idx, 1);
+                updateFileList();
+            });
+        });
+    }
+
+    function initFileUpload() {
+        const dropZone = document.getElementById('file-drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const selectBtn = document.getElementById('select-files-btn');
+        if (!dropZone) return;
+
+        dropZone.addEventListener('click', () => fileInput.click());
+        selectBtn?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            if (selectedFiles.length + files.length > 5) {
+                alert('Максимум 5 файлов');
+                return;
+            }
+            files.forEach(f => {
+                if (!selectedFiles.some(ex => ex.name === f.name && ex.size === f.size)) {
+                    selectedFiles.push(f);
+                }
+            });
+            updateFileList();
+        });
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('drag-over');
+        });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            const files = Array.from(e.dataTransfer.files);
+            if (selectedFiles.length + files.length > 5) {
+                alert('Максимум 5 файлов');
+                return;
+            }
+            files.forEach(f => {
+                if (!selectedFiles.some(ex => ex.name === f.name && ex.size === f.size)) {
+                    selectedFiles.push(f);
+                }
+            });
+            updateFileList();
+        });
+    }
+
+    // Удаление существующих файлов
+    function initExistingFiles() {
+        document.querySelectorAll('.remove-existing-file').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.dataset.id;
+                if (id && !deletedAttachmentIds.includes(id)) {
+                    deletedAttachmentIds.push(id);
+                }
+                this.closest('.existing-attachment-item').remove();
+                document.getElementById('deleted-attachments').value = deletedAttachmentIds.join(',');
+            });
+        });
+    }
+
+    let easyMDE;
+
     document.addEventListener('DOMContentLoaded', function() {
+        const textarea = document.getElementById('content');
+        if (!textarea) return;
+
+        easyMDE = new EasyMDE({
+            element: textarea,
+            spellChecker: false,
+            autoDownloadFontAwesome: true,
+            forceSync: true,
+            renderingConfig: {
+                singleLineBreaks: false,
+                codeSyntaxHighlighting: true,
+            },
+            previewRender: function(plainText) {
+                let html = marked.parse(plainText);
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = html;
+                renderMathInElement(tempDiv, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false}
+                    ]
+                });
+                return tempDiv.innerHTML;
+            }
+        });
+
+        easyMDE.codemirror.on('refresh', function() {
+            setTimeout(() => {
+                const preview = document.querySelector('.EasyMDEContainer .editor-preview');
+                if (preview) {
+                    renderMathInElement(preview, {
+                        delimiters: [
+                            {left: '$$', right: '$$', display: true},
+                            {left: '$', right: '$', display: false}
+                        ]
+                    });
+                }
+            }, 100);
+        });
+
         const initialTagsStr = "{{ tags_str }}";
-        const initialTags = initialTagsStr ? initialTagsStr.split(',').map(t => t.trim()) : [];
+        const initialTags = initialTagsStr ? initialTagsStr.split(',').map(t => t.trim()).filter(t => t) : [];
         const tagsInput = new TagsInput('tags-container', 'tags-hidden', 7, 20, initialTags);
-        document.getElementById('edit-form').addEventListener('submit', function(e) {
-            if (tagsInput.getTags().length > 7) {
-                tagsInput.showToast('❌ Нельзя добавить больше 7 тегов.');
+        const form = document.getElementById('edit-form');
+
+        initFileUpload();
+        initExistingFiles();
+
+        form.addEventListener('submit', function(e) {
+            const title = document.getElementById('title').value.trim();
+            const content = easyMDE.value().trim();
+            if (!title || !content) {
+                tagsInput.showToast('❌ Заголовок и текст не могут быть пустыми.', 'error');
                 e.preventDefault();
                 return false;
             }
+            if (tagsInput.getTags().length > 7) {
+                tagsInput.showToast('❌ Нельзя добавить больше 7 тегов.', 'error');
+                e.preventDefault();
+                return false;
+            }
+            document.getElementById('content').value = content;
             return true;
         });
     });
