@@ -2,17 +2,17 @@
 
 {% block content %}
 <div class="edit-answer-container">
-    <h1>Редактировать ответ</h1>
+    <h1 data-i18n="edit_answer">{{ _('Редактировать ответ') }}</h1>
     <form method="post" class="edit-form" id="edit-form" enctype="multipart/form-data">
         <div class="form-group">
-            <label for="content">Текст ответа (Markdown + LaTeX)</label>
+            <label for="content" data-i18n="answer_content_label">{{ _('Текст ответа (Markdown + LaTeX)') }}</label>
             <textarea id="content" name="content" rows="8" required>{{ answer.content }}</textarea>
         </div>
 
         <!-- Существующие вложения ответа -->
         {% if answer_attachments %}
             <div class="form-group">
-                <label>Прикреплённые файлы</label>
+                <label data-i18n="existing_attachments">{{ _('Прикреплённые файлы') }}</label>
                 <div class="existing-attachments" id="existing-attachments">
                     {% for file in answer_attachments %}
                         <div class="existing-attachment-item" data-id="{{ file.id }}">
@@ -27,21 +27,21 @@
 
         <!-- Новые файлы -->
         <div class="form-group">
-            <label>Добавить новые файлы (до 5)</label>
+            <label data-i18n="add_new_files">{{ _('Добавить новые файлы (до 5)') }}</label>
             <div class="file-drop-zone" id="file-drop-zone">
                 <div class="file-drop-message">
-                    <i class="fas fa-cloud-upload-alt"></i> Перетащите файлы сюда или щёлкните для выбора
+                    <i class="fas fa-cloud-upload-alt"></i> <span data-i18n="drop_files">{{ _('Перетащите файлы сюда или щёлкните для выбора') }}</span>
                 </div>
-                <input type="file" name="attachments" id="file-input" multiple accept=".png,.jpg,.jpeg,.gif,.pdf,.txt,.zip,.rar,.doc,.docx,.xls,.xlsx,.mp4,.webm,.mov,.avi,.mp3,.wav" style="display: none;">
-                <button type="button" class="btn-small" id="select-files-btn">Выбрать файлы</button>
+                <input type="file" name="attachments" id="file-input" multiple accept=".png,.jpg,.jpeg,.gif,.pdf,.txt,.zip,.rar,.doc,.docx,.xls,.xlsx,.mp4,.webm,.mov,.avi,.mp3,.wav" style="display: none;" autocomplete="off">
+                <button type="button" class="btn-small" id="select-files-btn" data-i18n="select_files">{{ _('Выбрать файлы') }}</button>
             </div>
             <div id="file-list" class="file-list"></div>
-            <small>Поддерживаются: изображения, видео, аудио, документы, архивы. Максимум 5 файлов.</small>
+            <small data-i18n="attachments_hint">{{ _('Поддерживаются: изображения, видео, аудио, документы, архивы. Максимум 5 файлов.') }}</small>
         </div>
 
         <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Сохранить</button>
-            <a href="{{ url_for('question_detail', question_id=answer.question_id) }}" class="btn btn-secondary">Отмена</a>
+            <button type="submit" class="btn btn-primary" data-i18n="save">{{ _('Сохранить') }}</button>
+            <a href="{{ url_for('question_detail', question_id=answer.question_id) }}" class="btn btn-secondary" data-i18n="cancel">{{ _('Отмена') }}</a>
         </div>
     </form>
 </div>
@@ -60,11 +60,11 @@
         display: none !important;
     }
     .file-drop-zone {
-        border: 2px dashed #cbd5e1;
+        border: 2px dashed var(--border-color);
         border-radius: 12px;
         padding: 20px;
         text-align: center;
-        background: #f8fafc;
+        background: var(--bg-hover);
         transition: all 0.2s;
         cursor: pointer;
     }
@@ -85,26 +85,47 @@
         gap: 10px;
     }
     .file-item, .existing-attachment-item {
-        background: #f1f5f9;
+        background: var(--bg-hover);
         border-radius: 20px;
         padding: 4px 12px 4px 8px;
         display: inline-flex;
         align-items: center;
         gap: 8px;
         font-size: 13px;
+        color: var(--text-primary);
     }
     .file-item .remove-file, .existing-attachment-item .remove-existing-file {
         cursor: pointer;
-        color: #ef4444;
+        color: var(--toast-error);
         font-weight: bold;
         margin-left: 4px;
         background: none;
         border: none;
     }
+    .file-item .remove-file:hover, .existing-attachment-item .remove-existing-file:hover {
+        color: #dc2626;
+    }
+
+    @media (max-width: 768px) {
+        .edit-answer-container {
+            margin-top: 80px;
+            padding: 20px;
+        }
+        .edit-answer-container h1 {
+            font-size: 24px;
+        }
+        .form-actions {
+            flex-direction: column;
+        }
+        .form-actions .btn {
+            width: 100%;
+            text-align: center;
+        }
+    }
 </style>
 
 <script>
-    // Управление новыми файлами
+    // ======== УПРАВЛЕНИЕ ФАЙЛАМИ ========
     let selectedFiles = [];
     let deletedAttachmentIds = [];
 
@@ -150,7 +171,7 @@
         fileInput.addEventListener('change', (e) => {
             const files = Array.from(e.target.files);
             if (selectedFiles.length + files.length > 5) {
-                alert('Максимум 5 файлов');
+                alert(__('max_files_reached'));
                 return;
             }
             files.forEach(f => {
@@ -173,7 +194,7 @@
             dropZone.classList.remove('drag-over');
             const files = Array.from(e.dataTransfer.files);
             if (selectedFiles.length + files.length > 5) {
-                alert('Максимум 5 файлов');
+                alert(__('max_files_reached'));
                 return;
             }
             files.forEach(f => {
@@ -185,7 +206,7 @@
         });
     }
 
-    // Удаление существующих файлов
+    // ======== УДАЛЕНИЕ СУЩЕСТВУЮЩИХ ФАЙЛОВ ========
     function initExistingFiles() {
         document.querySelectorAll('.remove-existing-file').forEach(btn => {
             btn.addEventListener('click', function() {
@@ -199,6 +220,7 @@
         });
     }
 
+    // ======== ИНИЦИАЛИЗАЦИЯ ========
     document.addEventListener('DOMContentLoaded', function() {
         const textarea = document.getElementById('content');
         if (!textarea) return;
@@ -249,7 +271,7 @@
         form.addEventListener('submit', function(e) {
             const content = easyMDE.value().trim();
             if (!content) {
-                alert('❌ Текст ответа не может быть пустым.');
+                showToast(__('empty_answer'), 'error');
                 e.preventDefault();
                 return false;
             }

@@ -2,3 +2,5 @@ Flask==2.3.3
 Werkzeug==2.3.7
 markdown==3.5.1
 bleach==6.1.0
+Flask-Babel==4.0.0
+python-dotenv==1.0.0

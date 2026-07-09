@@ -3,19 +3,19 @@
 {% block content %}
 <div class="contacts-page">
     <div class="contacts-hero">
-        <h1>Контакты</h1>
-        <p>Свяжитесь с нами — мы всегда рады помочь</p>
+        <h1 data-i18n="contacts_title">{{ _('Контакты') }}</h1>
+        <p data-i18n="contacts_subtitle">{{ _('Свяжитесь с нами — мы всегда рады помочь') }}</p>
     </div>
 
     <div class="contacts-content">
         <div class="contacts-block">
-            <h2>👨‍💻 Разработчик</h2>
+            <h2>👨‍💻 <span data-i18n="developer">{{ _('Разработчик') }}</span></h2>
             <div class="developer-info">
                 <div class="avatar-large">
                     <i class="fas fa-code"></i>
                 </div>
                 <h3>Y-deva</h3>
-                <p>Full-stack разработчик, создатель CareerVibe</p>
+                <p data-i18n="developer_desc">{{ _('Full-stack разработчик, создатель CareerVibe') }}</p>
                 <a href="https://github.com/Y-deva" target="_blank" rel="noopener noreferrer" class="github-link">
                     <i class="fab fa-github"></i> github.com/Y-deva
                 </a>
@@ -23,13 +23,13 @@
         </div>
 
         <div class="contacts-block">
-            <h2>🏫 Университетская лаборатория</h2>
+            <h2>🏫 <span data-i18n="university_lab">{{ _('Лаборатория') }}</span></h2>
             <div class="lab-info">
                 <div class="avatar-large">
                     <i class="fas fa-flask"></i>
                 </div>
                 <h3>Find a Talab</h3>
-                <p>Лаборатория исследований в области IT и карьерного развития</p>
+                <p data-i18n="lab_desc">{{ _('Лаборатория исследований в области IT и карьерного развития') }}</p>
                 <a href="https://github.com/findatalab" target="_blank" rel="noopener noreferrer" class="github-link">
                     <i class="fab fa-github"></i> github.com/findatalab
                 </a>
@@ -37,42 +37,68 @@
         </div>
 
         <div class="contacts-block">
-            <h2>📧 Связь с нами</h2>
+            <h2>📧 <span data-i18n="contact_us">{{ _('Связь с нами') }}</span></h2>
             <div class="contact-info">
                 <p><i class="fas fa-envelope"></i> <strong>Email:</strong> support@careervibe.ru</p>
                 <p><i class="fab fa-telegram"></i> <strong>Telegram:</strong> @careervibe_support</p>
                 <p><i class="fab fa-discord"></i> <strong>Discord:</strong> CareerVibe Community</p>
-                <p><i class="fas fa-clock"></i> <strong>Время ответа:</strong> В рабочие дни 10:00–19:00 (МСК)</p>
+                <p><i class="fas fa-clock"></i> <strong data-i18n="response_time">{{ _('Время ответа') }}:</strong> <span data-i18n="response_time_text">{{ _('В рабочие дни 10:00–19:00 (МСК)') }}</span></p>
             </div>
         </div>
 
         <div class="contacts-block">
-            <h2>🐛 Сообщить о проблеме</h2>
+            <h2>🐛 <span data-i18n="report_issue">{{ _('Сообщить') }}</span></h2>
             <div class="report-info">
-                <p>Нашли баг или ошибку на сайте? Создайте issue на GitHub:</p>
-                <a href="https://github.com/Y-deva/careervibe/issues" target="_blank" rel="noopener noreferrer" class="report-link">
-                    <i class="fab fa-github"></i> Создать issue
+                <p data-i18n="report_issue_text">{{ _('Нашли баг или ошибку на сайте? Создайте issue на GitHub:') }}</p>
+                <a href="https://github.com/findatalab/careervibe/issues" target="_blank" rel="noopener noreferrer" class="report-link">
+                    <i class="fab fa-github"></i> <span data-i18n="create_issue">{{ _('Создать issue') }}</span>
                 </a>
-                <p class="small">Или напишите нам на email с подробным описанием проблемы.</p>
+                <p class="small" data-i18n="report_issue_alt">{{ _('Или напишите нам на email с подробным описанием проблемы.') }}</p>
             </div>
         </div>
 
         <div class="contacts-block">
-            <h2>🤝 Партнёрство и сотрудничество</h2>
+            <h2>🤝 <span data-i18n="partnership">{{ _('Сотрудничество') }}</span></h2>
             <div class="partnership-info">
-                <p>По вопросам партнёрства, рекламы и сотрудничества:</p>
+                <p data-i18n="partnership_text">{{ _('По вопросам партнёрства, рекламы и сотрудничества:') }}</p>
                 <p><i class="fas fa-envelope"></i> <strong>partners@careervibe.ru</strong></p>
                 <p><i class="fab fa-linkedin"></i> <strong>LinkedIn:</strong> CareerVibe</p>
+            </div>
+        </div>
+
+        <div class="contacts-block">
+            <h2>🌐 <span data-i18n="social_networks">{{ _('Соц. сети') }}</span></h2>
+            <div class="socials-contacts">
+                <a href="https://t.me/finuniverchan" target="_blank" rel="noopener" class="social-link-contacts" aria-label="Telegram">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3.003-2.214-1.446 1.392c-.16.16-.295.295-.605.295l.216-3.075 5.598-5.058c.244-.216-.053-.336-.378-.12L7.323 13.42l-2.948-.922c-.635-.198-.647-.635.138-.94l11.534-4.443c.528-.192 1.033.125.846.706z"/>
+                    </svg>
+                </a>
+                <a href="https://vk.com/finuniversity" target="_blank" rel="noopener" class="social-link-contacts" aria-label="VK">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm6.375 17.25h-1.875c-.75 0-.975-.75-2.175-1.875-1.125-.9-1.575-.975-1.875-.975-.375 0-.525.15-.525.6v1.65c0 .375-.15.6-.525.6h-2.55c-2.775 0-5.025-2.625-5.025-6.075v-1.65c0-.375.15-.6.525-.6h2.55c.375 0 .525.225.525.6v2.475c0 .525.375 1.275 1.125 1.275.75 0 1.125-.6 1.125-1.275V8.7c0-.375.15-.6.525-.6h2.55c.375 0 .525.225.525.6v4.275c0 .375.375.975 1.125.975.9 0 1.275-.75 1.275-1.275V8.7c0-.375.15-.6.525-.6h1.875c.375 0 .525.225.525.6v5.4c0 2.775-1.65 4.05-3.3 4.05z"/>
+                    </svg>
+                </a>
+                <a href="https://github.com/findatalab" target="_blank" rel="noopener" class="social-link-contacts" aria-label="GitHub">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M12 0C5.373 0 0 5.373 0 12c0 5.302 3.438 9.8 8.205 11.387.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.726-4.042-1.416-4.042-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.09-.745.082-.73.082-.73 1.205.085 1.838 1.237 1.838 1.237 1.07 1.834 2.807 1.304 3.492.997.108-.775.418-1.305.762-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.468-2.38 1.235-3.22-.123-.3-.535-1.52.117-3.16 0 0 1.008-.322 3.3 1.23.96-.267 1.98-.4 3-.4 1.02 0 2.04.133 3 .4 2.29-1.552 3.297-1.23 3.297-1.23.653 1.64.24 2.86.118 3.16.768.84 1.233 1.91 1.233 3.22 0 4.61-2.804 5.62-5.476 5.92.43.37.824 1.102.824 2.22 0 1.602-.015 2.894-.015 3.287 0 .322.216.694.825.577C20.565 21.795 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                </a>
+                <a href="https://www.youtube.com/@FinUniversity" target="_blank" rel="noopener" class="social-link-contacts" aria-label="YouTube">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.98 16.44c-.21 1.07-1.03 1.89-2.1 2.1C14.57 18.85 12 18.85 12 18.85s-2.57 0-3.88-.31c-1.07-.21-1.89-1.03-2.1-2.1C5.71 15.14 5.71 12 5.71 12s0-3.14.31-4.44c.21-1.07 1.03-1.89 2.1-2.1C9.43 5.15 12 5.15 12 5.15s2.57 0 3.88.31c1.07.21 1.89 1.03 2.1 2.1.31 1.3.31 4.44.31 4.44s0 3.14-.31 4.44zM10.24 14.52l3.56-2.52-3.56-2.52v5.04z"/>
+                    </svg>
+                </a>
             </div>
         </div>
     </div>
 
     <div class="contacts-footer">
-        <p>© 2026 CareerVibe — карьерный нетворкинг</p>
+        <p>© 2026 CareerVibe — <span data-i18n="career_networking">{{ _('карьерный нетворкинг') }}</span></p>
         <p>
-            <a href="{{ url_for('mission') }}">О проекте</a> |
-            <a href="{{ url_for('help_page') }}">Помощь</a> |
-            <a href="{{ url_for('rules') }}">Правила</a>
+            <a href="{{ url_for('mission') }}" data-i18n="about">{{ _('О проекте') }}</a> |
+            <a href="{{ url_for('help_page') }}" data-i18n="help">{{ _('Помощь') }}</a> |
+            <a href="{{ url_for('rules') }}" data-i18n="rules">{{ _('Правила') }}</a>
         </p>
     </div>
 </div>
@@ -81,16 +107,18 @@
     .contacts-page {
         max-width: 1000px;
         margin: 40px auto;
-        background: white;
+        background: var(--bg-card);
         border-radius: 24px;
         overflow: hidden;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        box-shadow: var(--shadow-heavy);
+        transition: background 0.3s ease, box-shadow 0.3s ease;
     }
     .contacts-hero {
-        background: linear-gradient(90deg, #283f80 0%, #0b9cb5 100%);
+        background: var(--gradient-hero);
         color: white;
         padding: 50px 30px;
         text-align: center;
+        transition: background 0.3s ease;
     }
     .contacts-hero h1 {
         font-size: 42px;
@@ -103,21 +131,21 @@
     .contacts-content {
         padding: 40px 30px;
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         gap: 30px;
     }
     .contacts-block {
-        background: #f8fafc;
+        background: var(--bg-hover);
         border-radius: 16px;
         padding: 25px;
-        transition: transform 0.2s, box-shadow 0.2s;
+        transition: transform 0.2s, box-shadow 0.2s, background 0.3s ease;
     }
     .contacts-block:hover {
         transform: translateY(-4px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        box-shadow: var(--shadow-hover);
     }
     .contacts-block h2 {
-        color: #1a3a6e;
+        color: var(--text-link);
         font-size: 22px;
         margin-bottom: 20px;
         padding-bottom: 10px;
@@ -129,24 +157,25 @@
     .avatar-large {
         width: 80px;
         height: 80px;
-        background: linear-gradient(135deg, #28b8d5, #1689a7);
+        background: var(--avatar-gradient);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         margin: 0 auto 15px;
+        transition: background 0.3s ease;
     }
     .avatar-large i {
         font-size: 40px;
         color: white;
     }
     .contacts-block h3 {
-        color: #1a3a6e;
+        color: var(--text-link);
         font-size: 18px;
         margin-bottom: 8px;
     }
     .contacts-block p {
-        color: #475569;
+        color: var(--text-secondary);
         line-height: 1.5;
         margin: 10px 0;
     }
@@ -175,15 +204,54 @@
     }
     .small {
         font-size: 12px;
-        color: #94a3b8;
+        color: var(--text-muted);
         margin-top: 12px;
     }
+
+    .socials-contacts {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        margin-top: 10px;
+        flex-wrap: wrap;
+    }
+    .social-link-contacts {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: var(--bg-card);
+        color: var(--text-link);
+        transition: transform 0.2s, background 0.2s, color 0.2s, box-shadow 0.2s;
+        border: 1px solid var(--border-light);
+        text-decoration: none;
+    }
+    .social-link-contacts svg {
+        width: 24px;
+        height: 24px;
+        fill: currentColor;
+    }
+    .social-link-contacts:hover {
+        transform: translateY(-4px) scale(1.05);
+        background: #0b9cb5;
+        color: white;
+        box-shadow: 0 4px 16px rgba(11,156,181,0.3);
+        border-color: #0b9cb5;
+    }
+    body.dark-theme .social-link-contacts:hover {
+        background: #0b9cb5;
+        color: white;
+    }
+
     .contacts-footer {
         text-align: center;
         padding: 25px 30px;
-        border-top: 1px solid #e2e8f0;
-        color: #64748b;
-        background: white;
+        border-top: 1px solid var(--border-light);
+        color: var(--text-muted);
+        background: var(--bg-card);
+        transition: border-color 0.3s ease, background 0.3s ease;
     }
     .contacts-footer a {
         color: #0b9cb5;
@@ -191,6 +259,91 @@
     }
     .contacts-footer a:hover {
         text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+        .contacts-page {
+            margin: 20px 16px;
+            border-radius: 20px;
+        }
+        .contacts-hero {
+            padding: 35px 20px;
+        }
+        .contacts-hero h1 {
+            font-size: 32px;
+        }
+        .contacts-hero p {
+            font-size: 18px;
+        }
+        .contacts-content {
+            padding: 25px 20px;
+            grid-template-columns: 1fr;
+        }
+        .contacts-block {
+            padding: 20px;
+        }
+        .contacts-block h2 {
+            font-size: 20px;
+        }
+        .socials-contacts {
+            gap: 14px;
+        }
+        .social-link-contacts {
+            width: 42px;
+            height: 42px;
+        }
+        .social-link-contacts svg {
+            width: 20px;
+            height: 20px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .contacts-page {
+            margin: 12px 10px;
+            border-radius: 16px;
+        }
+        .contacts-hero {
+            padding: 25px 16px;
+        }
+        .contacts-hero h1 {
+            font-size: 26px;
+        }
+        .contacts-hero p {
+            font-size: 16px;
+        }
+        .contacts-content {
+            padding: 20px 16px;
+        }
+        .contacts-block {
+            padding: 16px;
+        }
+        .contacts-block h2 {
+            font-size: 18px;
+        }
+        .avatar-large {
+            width: 64px;
+            height: 64px;
+        }
+        .avatar-large i {
+            font-size: 32px;
+        }
+        .github-link, .report-link {
+            font-size: 14px;
+            padding: 8px 16px;
+        }
+        .social-link-contacts {
+            width: 36px;
+            height: 36px;
+        }
+        .social-link-contacts svg {
+            width: 18px;
+            height: 18px;
+        }
+        .contacts-footer {
+            font-size: 13px;
+            padding: 20px 16px;
+        }
     }
 </style>
 {% endblock %}

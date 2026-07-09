@@ -19,42 +19,45 @@
                 {% if user.bio %}
                     {{ user.bio }}
                 {% else %}
-                    <span class="bio-placeholder">Информация о себе пока не добавлена</span>
+                    <span class="bio-placeholder" data-i18n="bio_empty">{{ _('Информация о себе пока не добавлена') }}</span>
                 {% endif %}
             </p>
-            <p class="profile-joined"><i class="fas fa-calendar-alt"></i> На сайте с: {{ user.created_at[:10] }}</p>
+            <p class="profile-joined"><i class="fas fa-calendar-alt"></i> <span data-i18n="profile_title">{{ _('На сайте с') }}</span>: {{ user.created_at[:10] }}</p>
             {% if user_id == user.id %}
                 <a href="{{ url_for('edit_profile') }}" class="btn-small edit-profile-btn">
-                    <i class="fas fa-edit"></i> Редактировать профиль
+                    <i class="fas fa-edit"></i> <span data-i18n="edit_profile">{{ _('Редактировать профиль') }}</span>
                 </a>
             {% endif %}
         </div>
     </div>
+
     <div class="profile-tabs">
-        <div class="tab active" data-tab="questions">Вопросы ({{ questions|length }})</div>
-        <div class="tab" data-tab="answers">Ответы ({{ answers|length }})</div>
+        <div class="tab active" data-tab="questions"><span data-i18n="questions_tab">{{ _('Вопросы') }}</span> ({{ questions|length }})</div>
+        <div class="tab" data-tab="answers"><span data-i18n="answers_tab">{{ _('Ответы') }}</span> ({{ answers|length }})</div>
     </div>
+
     <div id="questions-tab" class="tab-content active">
         {% for q in questions %}
             <div class="question-item">
-                <div class="question-stats">{{ q.votes }} голосов · {{ q.answer_count }} ответов · {{ q.views }} просмотров</div>
+                <div class="question-stats">{{ q.votes }} <span data-i18n="votes">{{ _('голосов') }}</span> · {{ q.answer_count }} <span data-i18n="answers">{{ _('ответов') }}</span> · {{ q.views }} <span data-i18n="views">{{ _('просмотров') }}</span></div>
                 <div class="question-title"><a href="{{ url_for('question_detail', question_id=q.id) }}">{{ q.title }}</a></div>
                 <div class="question-date">{{ q.created_at[:16] }}</div>
             </div>
         {% else %}
-            <p class="empty-message">Нет вопросов.</p>
+            <p class="empty-message" data-i18n="no_questions_profile">{{ _('Нет вопросов.') }}</p>
         {% endfor %}
     </div>
+
     <div id="answers-tab" class="tab-content">
         {% for a in answers %}
             <div class="answer-item">
-                <div class="answer-stats">{{ a.votes }} голосов</div>
+                <div class="answer-stats">{{ a.votes }} <span data-i18n="votes">{{ _('голосов') }}</span></div>
                 <div><a href="{{ url_for('question_detail', question_id=a.question_id) }}">{{ a.question_title }}</a></div>
                 <div class="answer-preview">{{ a.content[:150] }}{% if a.content|length > 150 %}...{% endif %}</div>
                 <div class="answer-date">{{ a.created_at[:16] }}</div>
             </div>
         {% else %}
-            <p class="empty-message">Нет ответов.</p>
+            <p class="empty-message" data-i18n="no_answers_profile">{{ _('Нет ответов.') }}</p>
         {% endfor %}
     </div>
 </div>
@@ -74,10 +77,11 @@
     .profile-container {
         max-width: 1000px;
         margin: 30px auto;
-        background: white;
+        background: var(--bg-card);
         border-radius: 20px;
         padding: 30px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        box-shadow: var(--shadow);
+        transition: background 0.3s ease, box-shadow 0.3s ease;
     }
     .profile-header {
         display: flex;
@@ -85,7 +89,7 @@
         align-items: flex-start;
         flex-wrap: wrap;
         padding-bottom: 25px;
-        border-bottom: 1px solid #e2e8f0;
+        border-bottom: 1px solid var(--border-light);
     }
     .profile-avatar img, .avatar-placeholder {
         width: 120px;
@@ -94,7 +98,7 @@
         object-fit: cover;
     }
     .avatar-placeholder {
-        background: linear-gradient(135deg, #28b8d5, #1689a7);
+        background: var(--avatar-gradient);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -105,12 +109,12 @@
         flex: 1;
     }
     .profile-info h1 {
-        color: #1a3a6e;
+        color: var(--text-link);
         font-size: 28px;
         margin-bottom: 10px;
     }
     .profile-email {
-        color: #64748b;
+        color: var(--text-muted);
         font-size: 14px;
         margin-bottom: 12px;
     }
@@ -119,20 +123,21 @@
         width: 20px;
     }
     .profile-bio {
-        background: #f8fafc;
+        background: var(--bg-hover);
         padding: 15px;
         border-radius: 12px;
         margin: 15px 0;
-        color: #334155;
+        color: var(--text-secondary);
         line-height: 1.5;
         font-size: 15px;
+        transition: background 0.3s ease;
     }
     .bio-placeholder {
-        color: #94a3b8;
+        color: var(--placeholder-color);
         font-style: italic;
     }
     .profile-joined {
-        color: #64748b;
+        color: var(--text-muted);
         font-size: 13px;
         margin: 10px 0;
     }
@@ -146,66 +151,150 @@
         gap: 6px;
         margin-top: 10px;
     }
+
     .profile-tabs {
         display: flex;
         gap: 30px;
         margin: 25px 0 20px;
-        border-bottom: 2px solid #e2e8f0;
+        border-bottom: 2px solid var(--border-light);
+        flex-wrap: wrap;
     }
     .tab {
         padding: 10px 0;
         cursor: pointer;
         font-weight: 500;
-        color: #64748b;
+        color: var(--text-muted);
         transition: color 0.2s;
+        border-bottom: 3px solid transparent;
     }
     .tab.active {
         color: #0b9cb5;
-        border-bottom: 3px solid #0b9cb5;
+        border-bottom-color: #0b9cb5;
     }
     .tab:hover {
-        color: #1a3a6e;
+        color: var(--text-link);
     }
     .tab-content {
         display: none;
+        animation: fadeIn 0.3s ease;
     }
     .tab-content.active {
         display: block;
     }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
     .question-item, .answer-item {
         padding: 18px 0;
-        border-bottom: 1px solid #f1f5f9;
+        border-bottom: 1px solid var(--border-light);
+        transition: border-color 0.3s ease;
     }
     .question-item:last-child, .answer-item:last-child {
         border-bottom: none;
     }
     .question-stats, .answer-stats {
         font-size: 13px;
-        color: #64748b;
+        color: var(--text-muted);
         margin-bottom: 8px;
     }
     .question-title a {
         font-size: 18px;
         font-weight: 500;
-        color: #1a3a6e;
+        color: var(--text-link);
         text-decoration: none;
+        transition: color 0.2s;
     }
     .question-title a:hover {
         color: #0b9cb5;
     }
     .answer-preview {
         font-size: 14px;
-        color: #475569;
+        color: var(--text-secondary);
         margin: 8px 0;
     }
     .question-date, .answer-date {
         font-size: 12px;
-        color: #94a3b8;
+        color: var(--text-muted);
     }
     .empty-message {
         text-align: center;
-        color: #94a3b8;
+        color: var(--text-muted);
         padding: 30px;
+    }
+
+    @media (max-width: 768px) {
+        .profile-container {
+            padding: 20px;
+            margin: 16px;
+        }
+        .profile-header {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 20px;
+        }
+        .profile-avatar img, .avatar-placeholder {
+            width: 100px;
+            height: 100px;
+            font-size: 40px;
+        }
+        .profile-info h1 {
+            font-size: 24px;
+        }
+        .profile-tabs {
+            gap: 15px;
+            justify-content: center;
+        }
+        .tab {
+            font-size: 14px;
+            padding: 8px 0;
+        }
+        .question-title a {
+            font-size: 16px;
+        }
+        .question-stats, .answer-stats {
+            font-size: 12px;
+        }
+        .edit-profile-btn {
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .profile-container {
+            padding: 16px;
+            margin: 10px;
+            border-radius: 16px;
+        }
+        .profile-avatar img, .avatar-placeholder {
+            width: 80px;
+            height: 80px;
+            font-size: 32px;
+        }
+        .profile-info h1 {
+            font-size: 20px;
+        }
+        .profile-tabs {
+            gap: 10px;
+        }
+        .tab {
+            font-size: 13px;
+        }
+        .question-item, .answer-item {
+            padding: 14px 0;
+        }
+        .question-title a {
+            font-size: 15px;
+        }
     }
 </style>
 {% endblock %}

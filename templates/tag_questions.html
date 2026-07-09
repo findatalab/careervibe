@@ -2,7 +2,15 @@
 
 {% block content %}
 <div class="tag-questions">
-    <h1>Вопросы с тегом #{{ tag_name }}</h1>
+    <div class="tag-header">
+        <h1><span data-i18n="questions_with_tag">{{ _('Вопросы с тегом') }}</span> <span class="tag-name">#{{ tag_name }}</span></h1>
+        <div class="tag-actions">
+            <a href="{{ url_for('all_tags') }}" class="btn-small" data-i18n="all_tags">{{ _('Все теги') }}</a>
+            {% if user_id %}
+                <a href="{{ url_for('ask_question') }}" class="btn-small btn-primary" data-i18n="ask_question">{{ _('Задать вопрос') }}</a>
+            {% endif %}
+        </div>
+    </div>
 
     {% if questions %}
         <div class="questions-list">
@@ -19,15 +27,15 @@
                     </div>
                     <div class="question-card-right">
                         <div class="question-stats">
-                            <span>{{ q.votes }} голосов</span>
-                            <span>{{ q.answer_count }} ответов</span>
-                            <span>{{ q.views }} просмотров</span>
+                            <span>{{ q.votes }} <span data-i18n="votes">{{ _('голосов') }}</span></span>
+                            <span>{{ q.answer_count }} <span data-i18n="answers">{{ _('ответов') }}</span></span>
+                            <span>{{ q.views }} <span data-i18n="views">{{ _('просмотров') }}</span></span>
                         </div>
                         <div class="question-title">
                             <a href="{{ url_for('question_detail', question_id=q.id) }}">{{ q.title }}</a>
                         </div>
                         <div class="question-meta">
-                            <span>Автор: <a href="{{ url_for('profile', user_id=q.user_id) }}">{{ q.nickname or 'Пользователь' }}</a></span>
+                            <span><span data-i18n="author">{{ _('Автор') }}</span>: <a href="{{ url_for('profile', user_id=q.user_id) }}">{{ q.nickname or _('Пользователь') }}</a></span>
                             <span>{{ q.created_at[:16] }}</span>
                         </div>
                         {% if q.tags %}
@@ -44,9 +52,13 @@
         </div>
     {% else %}
         <div class="empty-tag">
-            <p>Вопросов с тегом #{{ tag_name }} пока нет.</p>
+            <div class="empty-tag-icon">🏷️</div>
+            <h2><span data-i18n="no_questions_with_tag">{{ _('Вопросов с тегом') }}</span> #{{ tag_name }} <span data-i18n="no_questions_yet">{{ _('пока нет') }}</span></h2>
+            <p data-i18n="be_first_to_ask">{{ _('Будьте первым, кто задаст вопрос по этой теме!') }}</p>
             {% if user_id %}
-                <a href="{{ url_for('ask_question') }}" class="btn btn-primary">Задать вопрос с этим тегом</a>
+                <a href="{{ url_for('ask_question') }}" class="btn btn-primary" data-i18n="ask_question_with_tag">{{ _('Задать вопрос с этим тегом') }}</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="btn btn-primary" data-i18n="login_to_ask">{{ _('Войдите, чтобы задать вопрос') }}</a>
             {% endif %}
         </div>
     {% endif %}
@@ -58,15 +70,158 @@
         margin: 40px auto;
         padding: 0 20px;
     }
-    .tag-questions h1 {
-        color: #1a3a6e;
+    .tag-header {
+        background: var(--bg-card);
+        border-radius: 16px;
+        padding: 24px 30px;
+        margin-bottom: 30px;
+        box-shadow: var(--shadow);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        transition: background 0.3s ease, box-shadow 0.3s ease;
+    }
+    .tag-header h1 {
+        color: var(--text-link);
+        font-size: 28px;
+        margin: 0;
+    }
+    .tag-name {
+        background: var(--tag-bg);
+        color: var(--tag-color);
+        padding: 4px 14px;
+        border-radius: 20px;
+        font-size: 24px;
+        display: inline-block;
+        transition: background 0.3s ease, color 0.3s ease;
+    }
+    .tag-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .tag-actions .btn-small {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+    .tag-actions .btn-primary {
+        background: var(--gradient-primary);
+        color: white;
+        border: none;
+    }
+    .tag-actions .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(11,156,181,0.3);
+    }
+
+    .empty-tag {
+        background: var(--bg-card);
+        border-radius: 24px;
+        padding: 60px 40px;
+        text-align: center;
+        box-shadow: var(--shadow);
+        transition: background 0.3s ease, box-shadow 0.3s ease;
+    }
+    .empty-tag-icon {
+        font-size: 64px;
+        margin-bottom: 20px;
+    }
+    .empty-tag h2 {
+        color: var(--text-link);
+        font-size: 28px;
+        margin-bottom: 15px;
+    }
+    .empty-tag p {
+        color: var(--text-secondary);
+        font-size: 16px;
         margin-bottom: 25px;
     }
-    .empty-tag {
-        background: white;
-        border-radius: 16px;
-        padding: 40px;
-        text-align: center;
+    .empty-tag .btn {
+        display: inline-block;
+        padding: 12px 30px;
+        border-radius: 40px;
+        font-size: 16px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .empty-tag .btn-primary {
+        background: var(--gradient-primary);
+        color: white;
+    }
+    .empty-tag .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(11,156,181,0.3);
+    }
+
+    @media (max-width: 768px) {
+        .tag-questions {
+            margin: 20px 16px;
+            padding: 0;
+        }
+        .tag-header {
+            padding: 18px 20px;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .tag-header h1 {
+            font-size: 24px;
+        }
+        .tag-name {
+            font-size: 20px;
+            padding: 3px 12px;
+        }
+        .tag-actions {
+            width: 100%;
+        }
+        .tag-actions .btn-small {
+            flex: 1;
+            text-align: center;
+        }
+        .empty-tag {
+            padding: 40px 20px;
+        }
+        .empty-tag h2 {
+            font-size: 24px;
+        }
+        .empty-tag p {
+            font-size: 15px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .tag-questions {
+            margin: 12px 10px;
+        }
+        .tag-header {
+            padding: 14px 16px;
+        }
+        .tag-header h1 {
+            font-size: 20px;
+        }
+        .tag-name {
+            font-size: 18px;
+            padding: 2px 10px;
+        }
+        .tag-actions .btn-small {
+            font-size: 13px;
+            padding: 6px 12px;
+        }
+        .empty-tag {
+            padding: 30px 16px;
+        }
+        .empty-tag h2 {
+            font-size: 20px;
+        }
+        .empty-tag p {
+            font-size: 14px;
+        }
+        .empty-tag .btn {
+            font-size: 14px;
+            padding: 10px 24px;
+        }
     }
 </style>
 {% endblock %}

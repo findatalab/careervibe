@@ -5,10 +5,10 @@
     <div class="question-header">
         <h1>{{ question.title }}</h1>
         <div class="question-meta">
-            <span>Задан: {{ question.created_at[:16] }}</span>
-            <span>Автор: <a href="{{ url_for('profile', user_id=question.user_id) }}">{{ question.nickname }}</a></span>
-            <span>Просмотров: {{ question.views }}</span>
-            <span>Голосов: {{ question.votes }}</span>
+            <span><span data-i18n="question_detail_title">{{ _('Задан') }}</span>: {{ question.created_at[:16] }}</span>
+            <span><span data-i18n="author">{{ _('Автор') }}</span>: <a href="{{ url_for('profile', user_id=question.user_id) }}">{{ question.nickname }}</a></span>
+            <span><span data-i18n="question_detail_views">{{ _('Просмотров') }}</span>: {{ question.views }}</span>
+            <span><span data-i18n="question_detail_votes">{{ _('Голосов') }}</span>: {{ question.votes }}</span>
         </div>
     </div>
 
@@ -42,14 +42,14 @@
                                 <div class="attachment-video">
                                     <video controls class="attachment-video-player">
                                         <source src="{{ url_for('uploaded_file', filename=file.filepath) }}" type="video/{{ ext }}">
-                                        Ваш браузер не поддерживает видео.
+                                        {{ _('Ваш браузер не поддерживает видео.') }}
                                     </video>
                                 </div>
                             {% elif ext in ['mp3', 'wav', 'ogg'] %}
                                 <div class="attachment-audio">
                                     <audio controls class="attachment-audio-player">
                                         <source src="{{ url_for('uploaded_file', filename=file.filepath) }}" type="audio/{{ ext }}">
-                                        Ваш браузер не поддерживает аудио.
+                                        {{ _('Ваш браузер не поддерживает аудио.') }}
                                     </audio>
                                 </div>
                             {% else %}
@@ -69,9 +69,9 @@
 
             {% if user_id == question.user_id %}
                 <div class="question-actions">
-                    <a href="{{ url_for('edit_question', question_id=question.id) }}" class="btn-small">Редактировать</a>
+                    <a href="{{ url_for('edit_question', question_id=question.id) }}" class="btn-small" data-i18n="edit_question">{{ _('Редактировать') }}</a>
                     <form method="post" action="{{ url_for('delete_question', question_id=question.id) }}" style="display:inline;">
-                        <button type="submit" class="btn-small btn-danger" onclick="return confirm('Удалить вопрос?')">Удалить</button>
+                        <button type="submit" class="btn-small btn-danger" onclick="return confirm(__('confirm_delete_question'))" data-i18n="delete_question">{{ _('Удалить') }}</button>
                     </form>
                 </div>
             {% endif %}
@@ -79,7 +79,7 @@
     </div>
 
     <div class="answers-section">
-        <h2>{{ answers|length }} ответа</h2>
+        <h2>{{ answers|length }} <span data-i18n="answers_count">{{ _('ответа') }}</span></h2>
         {% macro render_answer(answer, level=0) %}
             <div class="answer-card {% if answer.is_best %}best-answer{% endif %}" id="answer-{{ answer.id }}">
                 <div class="answer-avatar">
@@ -137,37 +137,37 @@
                     {% endif %}
 
                     <div class="answer-meta">
-                        <span>Ответил: <a href="{{ url_for('profile', user_id=answer.user_id) }}">{{ answer.nickname }}</a></span>
+                        <span><span data-i18n="author">{{ _('Ответил') }}</span>: <a href="{{ url_for('profile', user_id=answer.user_id) }}">{{ answer.nickname }}</a></span>
                         <span>{{ answer.created_at[:16] }}</span>
                         {% if answer.is_best %}
-                            <span class="best-badge">★ Лучший ответ</span>
+                            <span class="best-badge">★ <span data-i18n="best_answer_badge">{{ _('Лучший ответ') }}</span></span>
                         {% endif %}
                     </div>
                     {% if user_id == answer.user_id %}
                         <div class="answer-actions">
-                            <a href="{{ url_for('edit_answer', answer_id=answer.id) }}" class="btn-small">Редактировать</a>
+                            <a href="{{ url_for('edit_answer', answer_id=answer.id) }}" class="btn-small" data-i18n="edit_answer">{{ _('Редактировать') }}</a>
                             <form method="post" action="{{ url_for('delete_answer', answer_id=answer.id) }}" style="display:inline;">
-                                <button type="submit" class="btn-small btn-danger" onclick="return confirm('Удалить ответ?')">Удалить</button>
+                                <button type="submit" class="btn-small btn-danger" onclick="return confirm(__('confirm_delete_answer'))" data-i18n="delete_answer">{{ _('Удалить') }}</button>
                             </form>
                         </div>
                     {% endif %}
                     {% if user_id == question.user_id and not answer.is_best %}
                         <form method="post" action="{{ url_for('mark_best_answer', answer_id=answer.id) }}">
-                            <button type="submit" class="btn-small btn-best">Отметить как лучший</button>
+                            <button type="submit" class="btn-small btn-best" data-i18n="mark_best">{{ _('Отметить как лучший') }}</button>
                         </form>
                     {% endif %}
 
                     <!-- Кнопка ответа на ответ -->
-                    <button class="comment-answer-btn" data-id="{{ answer.id }}">💬 Ответить</button>
+                    <button class="comment-answer-btn" data-id="{{ answer.id }}">💬 <span data-i18n="reply">{{ _('Ответить') }}</span></button>
                     <div class="comment-form" id="comment-form-{{ answer.id }}" style="display:none;">
                         <form method="post" action="{{ url_for('add_answer', question_id=question.id) }}" class="reply-form" enctype="multipart/form-data">
                             <input type="hidden" name="parent_id" value="{{ answer.id }}">
-                            <textarea name="content" rows="3" placeholder="Напишите ответ на этот ответ..."></textarea>
+                            <textarea name="content" rows="3" data-i18n-placeholder="reply_placeholder"></textarea>
                             <div class="reply-file-upload">
                                 <input type="file" name="attachments" multiple accept=".png,.jpg,.jpeg,.gif,.pdf,.txt,.zip,.rar,.doc,.docx,.xls,.xlsx,.mp4,.webm,.mov,.avi,.mp3,.wav">
-                                <small>Можно прикрепить файлы</small>
+                                <small data-i18n="can_attach_files">{{ _('Можно прикрепить файлы') }}</small>
                             </div>
-                            <button type="submit" class="btn-small">Ответить</button>
+                            <button type="submit" class="btn-small" data-i18n="reply">{{ _('Ответить') }}</button>
                         </form>
                     </div>
 
@@ -189,27 +189,27 @@
 
     {% if user_id %}
         <div class="add-answer">
-            <h3>Ваш ответ</h3>
+            <h3 data-i18n="your_answer">{{ _('Ваш ответ') }}</h3>
             <form method="post" id="answer-form" action="{{ url_for('add_answer', question_id=question.id) }}" enctype="multipart/form-data">
-                <textarea name="content" id="answer-content" rows="5" required placeholder="Напишите ответ..."></textarea>
+                <textarea name="content" id="answer-content" rows="5" required data-i18n-placeholder="answer_placeholder"></textarea>
                 <div class="form-group">
-                    <label>Прикрепить файлы (до 5 файлов)</label>
+                    <label data-i18n="attach_files_label">{{ _('Прикрепить файлы (до 5 файлов)') }}</label>
                     <div class="answer-file-drop-zone" id="answer-file-drop-zone">
                         <div class="file-drop-message">
-                            <i class="fas fa-cloud-upload-alt"></i> Перетащите файлы сюда или щёлкните для выбора
+                            <i class="fas fa-cloud-upload-alt"></i> <span data-i18n="drop_files">{{ _('Перетащите файлы сюда или щёлкните для выбора') }}</span>
                         </div>
                         <input type="file" name="attachments" id="answer-file-input" multiple accept=".png,.jpg,.jpeg,.gif,.pdf,.txt,.zip,.rar,.doc,.docx,.xls,.xlsx,.mp4,.webm,.mov,.avi,.mp3,.wav" style="display: none;">
-                        <button type="button" class="btn-small" id="answer-select-files-btn">Выбрать файлы</button>
+                        <button type="button" class="btn-small" id="answer-select-files-btn" data-i18n="select_files">{{ _('Выбрать файлы') }}</button>
                     </div>
                     <div id="answer-file-list" class="file-list"></div>
-                    <small>Поддерживаются: изображения, видео, аудио, документы, архивы. Максимум 5 файлов.</small>
+                    <small data-i18n="attachments_hint">{{ _('Поддерживаются: изображения, видео, аудио, документы, архивы. Максимум 5 файлов.') }}</small>
                 </div>
-                <button type="submit" class="btn btn-primary">Отправить ответ</button>
+                <button type="submit" class="btn btn-primary" data-i18n="send_answer">{{ _('Отправить ответ') }}</button>
             </form>
         </div>
     {% else %}
         <div class="login-to-answer">
-            <p><a href="{{ url_for('login') }}">Войдите</a>, чтобы ответить на вопрос.</p>
+            <p><a href="{{ url_for('login') }}" data-i18n="login">{{ _('Войдите') }}</a>, <span data-i18n="login_to_answer">{{ _('чтобы ответить на вопрос.') }}</span></p>
         </div>
     {% endif %}
 </div>
@@ -234,7 +234,7 @@
         throwOnError: false
     });
 
-    // Голосование
+    // ======== ГОЛОСОВАНИЕ ========
     document.querySelectorAll('.vote-up, .vote-down').forEach(btn => {
         btn.addEventListener('click', async function() {
             const type = this.dataset.type;
@@ -257,25 +257,26 @@
                 if (data.user_vote === 1) upBtn.classList.add('active');
                 else if (data.user_vote === -1) downBtn.classList.add('active');
             } else {
-                alert('Ошибка голосования.');
+                alert(__('error_voting'));
             }
         });
     });
 
-    // Показать/скрыть форму ответа на ответ
+    // ======== ПОКАЗАТЬ/СКРЫТЬ ФОРМУ ОТВЕТА НА ОТВЕТ ========
     document.querySelectorAll('.comment-answer-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const id = this.dataset.id;
             const formDiv = document.getElementById(`comment-form-${id}`);
             if (formDiv.style.display === 'none') {
                 formDiv.style.display = 'block';
+                formDiv.querySelector('textarea')?.focus();
             } else {
                 formDiv.style.display = 'none';
             }
         });
     });
 
-    // Модальное окно для изображений
+    // ======== МОДАЛЬНОЕ ОКНО ДЛЯ ИЗОБРАЖЕНИЙ ========
     function openModal(src) {
         const modal = document.getElementById('imageModal');
         const modalImg = document.getElementById('modalImg');
@@ -289,18 +290,24 @@
         const modal = document.getElementById('imageModal');
         if (e.target === modal) modal.style.display = 'none';
     });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+    });
 
-    // Удаление вложений
+    // ======== УДАЛЕНИЕ ВЛОЖЕНИЙ ========
     async function deleteAttachment(attachmentId, element) {
-        if (!confirm('Удалить этот файл?')) return;
+        if (!confirm(__('delete_file'))) return;
         const response = await fetch(`/attachment/${attachmentId}/delete`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' }
         });
         if (response.ok) {
             element.remove();
+            showToast(__('file_deleted'), 'success');
         } else {
-            alert('Ошибка при удалении файла');
+            alert(__('error_deleting_file'));
         }
     }
     document.querySelectorAll('.delete-attachment-btn').forEach(btn => {
@@ -310,7 +317,7 @@
         });
     });
 
-    // Управление файлами для ответа
+    // ======== УПРАВЛЕНИЕ ФАЙЛАМИ ДЛЯ ОТВЕТА ========
     let answerSelectedFiles = [];
     function updateAnswerFileList() {
         const container = document.getElementById('answer-file-list');
@@ -351,7 +358,7 @@
         fileInput.addEventListener('change', (e) => {
             const files = Array.from(e.target.files);
             if (answerSelectedFiles.length + files.length > 5) {
-                alert('Максимум 5 файлов');
+                alert(__('max_files_reached'));
                 return;
             }
             files.forEach(f => {
@@ -373,7 +380,7 @@
             dropZone.classList.remove('drag-over');
             const files = Array.from(e.dataTransfer.files);
             if (answerSelectedFiles.length + files.length > 5) {
-                alert('Максимум 5 файлов');
+                alert(__('max_files_reached'));
                 return;
             }
             files.forEach(f => {
@@ -427,7 +434,7 @@
         form.addEventListener('submit', function(e) {
             const content = easyMDE.value().trim();
             if (!content) {
-                alert('Текст ответа не может быть пустым.');
+                alert(__('empty_answer'));
                 e.preventDefault();
                 return false;
             }
@@ -439,10 +446,63 @@
 {% endif %}
 
 <style>
+    .answer-meta {
+        font-size: 13px;
+        color: var(--text-muted);
+        margin: 10px 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    .answer-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 8px;
+        flex-wrap: wrap;
+    }
+    .question-actions {
+        margin-top: 15px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .login-to-answer {
+        background: var(--bg-hover);
+        padding: 20px;
+        border-radius: 12px;
+        text-align: center;
+        margin-top: 30px;
+    }
+    .login-to-answer a {
+        color: #0b9cb5;
+        font-weight: 600;
+        text-decoration: none;
+    }
+    .login-to-answer a:hover {
+        text-decoration: underline;
+    }
+    .reply-file-upload {
+        margin-top: 8px;
+    }
+    .reply-file-upload input[type="file"] {
+        padding: 6px 0;
+        font-size: 13px;
+    }
+    .reply-file-upload small {
+        display: block;
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-top: 2px;
+    }
+    .attachments-list {
+        margin-top: 15px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
     .attachment-item {
-        display: inline-block;
-        margin: 5px;
         position: relative;
+        display: inline-block;
     }
     .attachment-img {
         max-width: 150px;
@@ -454,11 +514,22 @@
         max-width: 300px;
         border-radius: 8px;
     }
+    .attachment-link {
+        background: var(--bg-hover);
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        text-decoration: none;
+        color: var(--text-link);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
     .delete-attachment-btn {
         position: absolute;
         top: -8px;
         right: -8px;
-        background: #ef4444;
+        background: var(--toast-error);
         color: white;
         border: none;
         border-radius: 50%;
@@ -497,17 +568,67 @@
         cursor: pointer;
     }
     .answer-file-drop-zone {
-        border: 2px dashed #cbd5e1;
+        border: 2px dashed var(--border-color);
         border-radius: 12px;
         padding: 15px;
         text-align: center;
-        background: #f8fafc;
+        background: var(--bg-hover);
         cursor: pointer;
         margin-top: 10px;
     }
     .answer-file-drop-zone.drag-over {
         border-color: #0b9cb5;
         background: #e0f2fe;
+    }
+
+    @media (max-width: 768px) {
+        .question-detail {
+            padding: 16px;
+        }
+        .question-header h1 {
+            font-size: 22px;
+        }
+        .question-meta {
+            font-size: 13px;
+            gap: 10px;
+        }
+        .answer-card {
+            padding: 16px 0;
+        }
+        .answer-card.best-answer {
+            margin: 0 -16px;
+            padding: 16px;
+        }
+        .answer-children {
+            margin-left: 20px;
+            padding-left: 10px;
+        }
+        .attachments-list {
+            gap: 10px;
+        }
+        .attachment-img {
+            max-width: 120px;
+            max-height: 120px;
+        }
+        .attachment-video-player {
+            max-width: 100%;
+        }
+        .voting {
+            flex-direction: row;
+            gap: 10px;
+        }
+        .question-content {
+            flex-direction: column;
+            align-items: center;
+        }
+        .answer-card {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        .answer-meta {
+            justify-content: center;
+        }
     }
 </style>
 {% endblock %}

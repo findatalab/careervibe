@@ -3,83 +3,99 @@
 {% block content %}
 <div class="help-page">
     <div class="help-hero">
-        <h1>Помощь</h1>
-        <p>Ответы на популярные вопросы и руководство по использованию платформы</p>
+        <h1 data-i18n="help_title">{{ _('Помощь') }}</h1>
+        <p data-i18n="help_subtitle">{{ _('Ответы на популярные вопросы и руководство по использованию платформы') }}</p>
     </div>
 
     <div class="help-content">
         <div class="help-block">
-            <h2>📝 Как задать вопрос?</h2>
-            <p>1. Нажмите кнопку <strong>«Задать вопрос»</strong> в правом верхнем углу.</p>
-            <p>2. Заполните заголовок и текст вопроса. Вы можете использовать <strong>Markdown</strong> и <strong>LaTeX</strong> для форматирования.</p>
-            <p>3. Добавьте до 7 тегов, разделяя их запятыми или нажимая Enter.</p>
-            <p>4. При необходимости прикрепите файлы (изображения, видео, документы).</p>
-            <p>5. Нажмите <strong>«Опубликовать»</strong>.</p>
+            <h2>📝 <span data-i18n="how_to_ask">{{ _('Как задать вопрос?') }}</span></h2>
+            <p>1. <span data-i18n="how_to_ask_1">{{ _('Нажмите кнопку') }}</span> <strong data-i18n="ask_question">{{ _('«Задать вопрос»') }}</strong> <span data-i18n="how_to_ask_1b">{{ _('в правом верхнем углу.') }}</span></p>
+            <p>2. <span data-i18n="how_to_ask_2">{{ _('Заполните заголовок и текст вопроса. Вы можете использовать') }}</span> <strong>Markdown</strong> <span data-i18n="how_to_ask_2b">{{ _('и') }}</span> <strong>LaTeX</strong> <span data-i18n="how_to_ask_2c">{{ _('для форматирования.') }}</span></p>
+            <p>3. <span data-i18n="how_to_ask_3">{{ _('Добавьте до 7 тегов, разделяя их запятыми или нажимая Enter.') }}</span></p>
+            <p>4. <span data-i18n="how_to_ask_4">{{ _('При необходимости прикрепите файлы (изображения, видео, документы).') }}</span></p>
+            <p>5. <span data-i18n="how_to_ask_5">{{ _('Нажмите') }}</span> <strong data-i18n="publish">{{ _('«Опубликовать»') }}</strong>.</p>
         </div>
 
         <div class="help-block">
-            <h2>📖 Markdown и LaTeX</h2>
-            <p>Редактор поддерживает:</p>
+            <h2>📖 Markdown <span data-i18n="and">и</span> LaTeX</h2>
+            <p data-i18n="editor_supports">{{ _('Редактор поддерживает:') }}</p>
             <ul>
-                <li><strong>Жирный текст</strong> — <code>**текст**</code></li>
-                <li><em>Курсив</em> — <code>*текст*</code></li>
-                <li><code>Код</code> — <code>`код`</code></li>
-                <li>Заголовки — <code># Заголовок</code>, <code>## Заголовок 2</code></li>
-                <li>Списки — <code>- пункт</code> или <code>1. пункт</code></li>
-                <li>Ссылки — <code>[текст](url)</code></li>
-                <li>Изображения — <code>![alt](url)</code></li>
-                <li>Таблицы — с помощью вертикальных линий и дефисов</li>
+                <li><strong data-i18n="bold_text">{{ _('Жирный текст') }}</strong> — <code>**<span data-i18n="text">текст</span>**</code></li>
+                <li><em data-i18n="italic_text">{{ _('Курсив') }}</em> — <code>*<span data-i18n="text">текст</span>*</code></li>
+                <li><code data-i18n="code_text">{{ _('Код') }}</code> — <code>`<span data-i18n="code">код</span>`</code></li>
+                <li><span data-i18n="headings">{{ _('Заголовки') }}</span> — <code># <span data-i18n="heading">Заголовок</span></code>, <code>## <span data-i18n="heading2">Заголовок 2</span></code></li>
+                <li><span data-i18n="lists">{{ _('Списки') }}</span> — <code>- <span data-i18n="item">пункт</span></code> <span data-i18n="or">или</span> <code>1. <span data-i18n="item">пункт</span></code></li>
+                <li><span data-i18n="links">{{ _('Ссылки') }}</span> — <code>[<span data-i18n="text">текст</span>](url)</code></li>
+                <li><span data-i18n="images">{{ _('Изображения') }}</span> — <code>![<span data-i18n="alt_text">альт</span>](url)</code></li>
+                <li><span data-i18n="tables">{{ _('Таблицы') }}</span> — <span data-i18n="tables_hint">{{ _('с помощью вертикальных линий и дефисов') }}</span></li>
             </ul>
-            <p><strong>LaTeX-формулы:</strong></p>
+            <p><strong>LaTeX-<span data-i18n="formulas">{{ _('формулы') }}</span>:</strong></p>
             <ul>
-                <li>Внутри строки: <code>$E = mc^2$</code></li>
-                <li>Отдельная формула: <code>$$\int_0^\infty e^{-x^2} dx = \frac{\sqrt{\pi}}{2}$$</code></li>
-            </ul>
-        </div>
-
-        <div class="help-block">
-            <h2>💬 Как отвечать на вопросы?</h2>
-            <p>1. Перейдите на страницу интересующего вас вопроса.</p>
-            <p>2. Напишите ответ в поле <strong>«Ваш ответ»</strong>.</p>
-            <p>3. При необходимости прикрепите файлы.</p>
-            <p>4. Нажмите <strong>«Отправить ответ»</strong>.</p>
-            <p>5. Вы также можете отвечать на уже существующие ответы, нажав кнопку <strong>«Ответить»</strong> под ответом.</p>
-        </div>
-
-        <div class="help-block">
-            <h2>👍 Голосование</h2>
-            <p>Вы можете голосовать за вопросы и ответы, которые считаете полезными:</p>
-            <ul>
-                <li>▲ — полезно / согласен</li>
-                <li>▼ — бесполезно / не согласен</li>
-            </ul>
-            <p>Автор вопроса может отметить лучший ответ, нажав кнопку <strong>«Отметить как лучший»</strong>.</p>
-        </div>
-
-        <div class="help-block">
-            <h2>🔍 Поиск</h2>
-            <p>Используйте строку поиска в шапке сайта:</p>
-            <ul>
-                <li><strong>Поиск по тексту</strong> — просто введите ключевые слова</li>
-                <li><strong>Поиск по тегу</strong> — введите <code>#тег</code> (например, <code>#python</code>)</li>
-            </ul>
-            <p>Также вы можете просмотреть <a href="{{ url_for('all_tags') }}">все теги</a> и выбрать интересующий.</p>
-        </div>
-
-        <div class="help-block">
-            <h2>👤 Профиль</h2>
-            <p>В профиле вы можете:</p>
-            <ul>
-                <li>Изменить никнейм</li>
-                <li>Загрузить аватарку</li>
-                <li>Добавить информацию о себе</li>
-                <li>Просмотреть свои вопросы и ответы</li>
+                <li><span data-i18n="inline_formula">{{ _('Внутри строки') }}</span>: <code>$E = mc^2$</code></li>
+                <li><span data-i18n="display_formula">{{ _('Отдельная формула') }}</span>: <code>$$\int_0^\infty e^{-x^2} dx = \frac{\sqrt{\pi}}{2}$$</code></li>
             </ul>
         </div>
 
         <div class="help-block">
-            <h2>⚡ Правила сообщества</h2>
-            <p>Пожалуйста, ознакомьтесь с <a href="{{ url_for('rules') }}">правилами сообщества</a> перед началом использования платформы.</p>
+            <h2>💬 <span data-i18n="how_to_answer">{{ _('Как отвечать на вопросы?') }}</span></h2>
+            <p>1. <span data-i18n="how_to_answer_1">{{ _('Перейдите на страницу интересующего вас вопроса.') }}</span></p>
+            <p>2. <span data-i18n="how_to_answer_2">{{ _('Напишите ответ в поле') }}</span> <strong data-i18n="your_answer">{{ _('«Ваш ответ»') }}</strong>.</p>
+            <p>3. <span data-i18n="how_to_answer_3">{{ _('При необходимости прикрепите файлы.') }}</span></p>
+            <p>4. <span data-i18n="how_to_answer_4">{{ _('Нажмите') }}</span> <strong data-i18n="send_answer">{{ _('«Отправить ответ»') }}</strong>.</p>
+            <p>5. <span data-i18n="how_to_answer_5">{{ _('Вы также можете отвечать на уже существующие ответы, нажав кнопку') }}</span> <strong data-i18n="reply">{{ _('«Ответить»') }}</strong> <span data-i18n="how_to_answer_5b">{{ _('под ответом.') }}</span></p>
+        </div>
+
+        <div class="help-block">
+            <h2>👍 <span data-i18n="voting_help">{{ _('Голосование') }}</span></h2>
+            <p data-i18n="voting_help_text">{{ _('Вы можете голосовать за вопросы и ответы, которые считаете полезными:') }}</p>
+            <ul>
+                <li>▲ — <span data-i18n="useful">{{ _('полезно / согласен') }}</span></li>
+                <li>▼ — <span data-i18n="not_useful">{{ _('бесполезно / не согласен') }}</span></li>
+            </ul>
+            <p><span data-i18n="best_answer_help">{{ _('Автор вопроса может отметить лучший ответ, нажав кнопку') }}</span> <strong data-i18n="mark_best">{{ _('«Отметить как лучший»') }}</strong>.</p>
+        </div>
+
+        <div class="help-block">
+            <h2>🔍 <span data-i18n="search_help">{{ _('Поиск') }}</span></h2>
+            <p data-i18n="search_help_text">{{ _('Используйте строку поиска в шапке сайта:') }}</p>
+            <ul>
+                <li><strong data-i18n="text_search">{{ _('Поиск по тексту') }}</strong> — <span data-i18n="text_search_hint">{{ _('просто введите ключевые слова') }}</span></li>
+                <li><strong data-i18n="tag_search">{{ _('Поиск по тегу') }}</strong> — <span data-i18n="tag_search_hint">{{ _('введите') }}</span> <code>#<span data-i18n="tag">{{ _('тег') }}</span></code> (<span data-i18n="example">{{ _('например') }}</span>, <code>#python</code>)</li>
+            </ul>
+            <p><span data-i18n="all_tags_link_text">{{ _('Также вы можете просмотреть') }}</span> <a href="{{ url_for('all_tags') }}" data-i18n="all_tags">{{ _('все теги') }}</a> <span data-i18n="all_tags_link_text2">{{ _('и выбрать интересующий.') }}</span></p>
+            <p><strong data-i18n="tag_autocomplete">{{ _('Автодополнение тегов') }}</strong> — <span data-i18n="tag_autocomplete_hint">{{ _('при вводе') }}</span> <code>#</code> <span data-i18n="tag_autocomplete_hint2">{{ _('появляются подсказки с существующими тегами.') }}</span></p>
+        </div>
+
+        <div class="help-block">
+            <h2>👤 <span data-i18n="profile_help">{{ _('Профиль') }}</span></h2>
+            <p data-i18n="profile_help_text">{{ _('В профиле вы можете:') }}</p>
+            <ul>
+                <li data-i18n="profile_change_nickname">{{ _('Изменить никнейм') }}</li>
+                <li data-i18n="profile_upload_avatar">{{ _('Загрузить аватарку') }}</li>
+                <li data-i18n="profile_add_bio">{{ _('Добавить информацию о себе') }}</li>
+                <li data-i18n="profile_view_activity">{{ _('Просмотреть свои вопросы и ответы') }}</li>
+            </ul>
+        </div>
+
+        <div class="help-block">
+            <h2>🌙 <span data-i18n="dark_theme_help">{{ _('Тёмная тема') }}</span></h2>
+            <p data-i18n="dark_theme_help_text">{{ _('Вы можете переключить тему сайта на тёмную или светлую. Кнопка переключения находится внизу бургер-меню. Тема сохраняется в браузере.') }}</p>
+        </div>
+
+        <div class="help-block">
+            <h2>🌐 <span data-i18n="language_help">{{ _('Смена языка') }}</span></h2>
+            <p data-i18n="language_help_text">{{ _('Сайт доступен на русском и английском языках. Переключатель языка находится в бургер-меню.') }}</p>
+        </div>
+
+        <div class="help-block">
+            <h2>⚡ <span data-i18n="rules_help">{{ _('Правила сообщества') }}</span></h2>
+            <p><span data-i18n="rules_help_text">{{ _('Пожалуйста, ознакомьтесь с') }}</span> <a href="{{ url_for('rules') }}" data-i18n="rules">{{ _('правилами сообщества') }}</a> <span data-i18n="rules_help_text2">{{ _('перед началом использования платформы.') }}</span></p>
+        </div>
+
+        <div class="help-block">
+            <h2>📧 <span data-i18n="feedback">{{ _('Обратная связь') }}</span></h2>
+            <p><span data-i18n="feedback_text">{{ _('Если у вас остались вопросы или вы нашли ошибку, свяжитесь с нами через') }}</span> <a href="{{ url_for('contacts') }}" data-i18n="contacts">{{ _('страницу контактов') }}</a>.</p>
         </div>
     </div>
 </div>
@@ -88,16 +104,18 @@
     .help-page {
         max-width: 1000px;
         margin: 40px auto;
-        background: white;
+        background: var(--bg-card);
         border-radius: 24px;
         overflow: hidden;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        box-shadow: var(--shadow-heavy);
+        transition: background 0.3s ease, box-shadow 0.3s ease;
     }
     .help-hero {
-        background: linear-gradient(90deg, #283f80 0%, #0b9cb5 100%);
+        background: var(--gradient-hero);
         color: white;
         padding: 50px 30px;
         text-align: center;
+        transition: background 0.3s ease;
     }
     .help-hero h1 {
         font-size: 42px;
@@ -113,8 +131,11 @@
     .help-block {
         margin-bottom: 40px;
     }
+    .help-block:last-child {
+        margin-bottom: 0;
+    }
     .help-block h2 {
-        color: #1a3a6e;
+        color: var(--text-link);
         font-size: 28px;
         margin-bottom: 15px;
         border-left: 5px solid #0b9cb5;
@@ -123,31 +144,103 @@
     .help-block p {
         font-size: 16px;
         line-height: 1.6;
-        color: #334155;
+        color: var(--text-secondary);
         margin: 12px 0;
     }
     .help-block ul {
         margin: 12px 0 12px 25px;
-        color: #334155;
+        color: var(--text-secondary);
         line-height: 1.6;
     }
     .help-block li {
         margin: 6px 0;
     }
     .help-block code {
-        background: #f1f5f9;
+        background: var(--code-bg);
         padding: 2px 6px;
         border-radius: 6px;
         font-family: monospace;
         font-size: 14px;
         color: #0b9cb5;
+        transition: background 0.3s ease;
     }
     .help-block a {
         color: #0b9cb5;
         text-decoration: none;
+        font-weight: 500;
     }
     .help-block a:hover {
         text-decoration: underline;
+    }
+    .help-block strong {
+        color: var(--text-primary);
+    }
+
+    @media (max-width: 768px) {
+        .help-page {
+            margin: 20px 16px;
+            border-radius: 20px;
+        }
+        .help-hero {
+            padding: 35px 20px;
+        }
+        .help-hero h1 {
+            font-size: 32px;
+        }
+        .help-hero p {
+            font-size: 18px;
+        }
+        .help-content {
+            padding: 25px 20px;
+        }
+        .help-block h2 {
+            font-size: 24px;
+            padding-left: 16px;
+        }
+        .help-block p {
+            font-size: 15px;
+        }
+        .help-block ul {
+            margin-left: 18px;
+        }
+        .help-block li {
+            font-size: 15px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .help-page {
+            margin: 12px 10px;
+            border-radius: 16px;
+        }
+        .help-hero {
+            padding: 25px 16px;
+        }
+        .help-hero h1 {
+            font-size: 26px;
+        }
+        .help-hero p {
+            font-size: 16px;
+        }
+        .help-content {
+            padding: 20px 16px;
+        }
+        .help-block h2 {
+            font-size: 20px;
+            padding-left: 12px;
+        }
+        .help-block p {
+            font-size: 14px;
+        }
+        .help-block ul {
+            margin-left: 14px;
+        }
+        .help-block li {
+            font-size: 14px;
+        }
+        .help-block code {
+            font-size: 13px;
+        }
     }
 </style>
 {% endblock %}

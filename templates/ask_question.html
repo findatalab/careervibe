@@ -2,43 +2,43 @@
 
 {% block content %}
 <div class="ask-question-container">
-    <h1>Задать новый вопрос</h1>
+    <h1 data-i18n="ask_question">{{ _('Задать новый вопрос') }}</h1>
     <form method="post" class="ask-form" id="ask-form" enctype="multipart/form-data">
         <div class="form-group">
-            <label for="title">Заголовок</label>
-            <input type="text" id="title" name="title" required placeholder="Кратко опишите суть вопроса">
+            <label for="title" data-i18n="question_placeholder">{{ _('Заголовок') }}</label>
+            <input type="text" id="title" name="title" required data-i18n-placeholder="question_placeholder" autocomplete="off">
         </div>
         <div class="form-group">
-            <label for="content">Текст вопроса (Markdown + LaTeX)</label>
-            <textarea id="content" name="content" rows="10" required placeholder="Подробно опишите вашу ситуацию..."></textarea>
+            <label for="content" data-i18n="content_label">{{ _('Текст вопроса (Markdown + LaTeX)') }}</label>
+            <textarea id="content" name="content" rows="10" required data-i18n-placeholder="content_placeholder"></textarea>
         </div>
         <div class="form-group">
-            <label>Теги (через запятую)</label>
+            <label data-i18n="tags_label">{{ _('Теги') }}</label>
             <div class="tags-input-container" id="tags-container">
                 <div class="tags-list" id="tags-list"></div>
-                <input type="text" id="tags-input" class="tags-input" placeholder="введите тег и нажмите запятую или Enter">
+                <input type="text" id="tags-input" class="tags-input" data-i18n-placeholder="tags_placeholder" autocomplete="off">
             </div>
             <input type="hidden" id="tags-hidden" name="tags">
-            <small>Максимум 7 тегов, каждый до 20 символов. Не используйте # в начале.</small>
+            <small data-i18n="tags_hint">{{ _('Максимум 7 тегов, каждый до 20 символов. Не используйте # в начале.') }}</small>
         </div>
 
-        <!-- БЛОК ЗАГРУЗКИ ФАЙЛОВ (с предпросмотром и удалением) -->
+        <!-- БЛОК ЗАГРУЗКИ ФАЙЛОВ -->
         <div class="form-group">
-            <label>Прикрепить файлы (до 5 файлов)</label>
+            <label data-i18n="attachments_label">{{ _('Прикрепить файлы (до 5 файлов)') }}</label>
             <div class="file-drop-zone" id="file-drop-zone">
                 <div class="file-drop-message">
-                    <i class="fas fa-cloud-upload-alt"></i> Перетащите файлы сюда или щёлкните для выбора
+                    <i class="fas fa-cloud-upload-alt"></i> <span data-i18n="drop_files">{{ _('Перетащите файлы сюда или щёлкните для выбора') }}</span>
                 </div>
-                <input type="file" name="attachments" id="file-input" multiple accept=".png,.jpg,.jpeg,.gif,.pdf,.txt,.zip,.rar,.doc,.docx,.xls,.xlsx,.mp4,.webm,.mov,.avi,.mp3,.wav" style="display: none;">
-                <button type="button" class="btn-small" id="select-files-btn">Выбрать файлы</button>
+                <input type="file" name="attachments" id="file-input" multiple accept=".png,.jpg,.jpeg,.gif,.pdf,.txt,.zip,.rar,.doc,.docx,.xls,.xlsx,.mp4,.webm,.mov,.avi,.mp3,.wav" style="display: none;" autocomplete="off">
+                <button type="button" class="btn-small" id="select-files-btn" data-i18n="select_files">{{ _('Выбрать файлы') }}</button>
             </div>
             <div id="file-list" class="file-list"></div>
-            <small>Поддерживаются: изображения, видео, аудио, документы, архивы. Максимум 5 файлов.</small>
+            <small data-i18n="attachments_hint">{{ _('Поддерживаются: изображения, видео, аудио, документы, архивы. Максимум 5 файлов.') }}</small>
         </div>
 
         <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Опубликовать вопрос</button>
-            <a href="{{ url_for('index') }}" class="btn btn-secondary">Отмена</a>
+            <button type="submit" class="btn btn-primary" data-i18n="publish">{{ _('Опубликовать вопрос') }}</button>
+            <a href="{{ url_for('index') }}" class="btn btn-secondary" data-i18n="cancel">{{ _('Отмена') }}</a>
         </div>
     </form>
 </div>
@@ -49,7 +49,6 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.css">
 <script src="https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
 <style>
     .EasyMDEContainer .editor-toolbar button:first-child,
@@ -57,11 +56,11 @@
         display: none !important;
     }
     .file-drop-zone {
-        border: 2px dashed #cbd5e1;
+        border: 2px dashed var(--border-color);
         border-radius: 12px;
         padding: 20px;
         text-align: center;
-        background: #f8fafc;
+        background: var(--bg-hover);
         transition: all 0.2s;
         cursor: pointer;
     }
@@ -82,17 +81,18 @@
         gap: 10px;
     }
     .file-item {
-        background: #f1f5f9;
+        background: var(--bg-hover);
         border-radius: 20px;
         padding: 4px 12px 4px 8px;
         display: inline-flex;
         align-items: center;
         gap: 8px;
         font-size: 13px;
+        color: var(--text-primary);
     }
     .file-item .remove-file {
         cursor: pointer;
-        color: #ef4444;
+        color: var(--toast-error);
         font-weight: bold;
         margin-left: 4px;
     }
@@ -100,13 +100,44 @@
         color: #dc2626;
     }
     .tag-input-disabled {
-        background-color: #f3f4f6;
-        color: #9ca3af;
+        background-color: var(--bg-hover);
+        color: var(--text-muted);
         cursor: not-allowed;
+    }
+
+    .tag-autocomplete {
+        position: absolute;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 1005;
+        min-width: 200px;
+        box-shadow: var(--shadow-hover);
+        display: none;
+    }
+    .tag-autocomplete .tag-suggestion {
+        padding: 8px 14px;
+        cursor: pointer;
+        color: var(--text-primary);
+        transition: background 0.2s;
+    }
+    .tag-autocomplete .tag-suggestion:hover {
+        background: var(--bg-hover);
+    }
+    .tag-autocomplete .tag-suggestion .highlight {
+        font-weight: bold;
+        background: #fbbf24;
+        color: #1a1a2e;
+    }
+    body.dark-theme .tag-autocomplete .tag-suggestion .highlight {
+        background: #f59e0b;
     }
 </style>
 
 <script>
+    // ======== КЛАСС ДЛЯ УПРАВЛЕНИЯ ТЕГАМИ ========
     class TagsInput {
         constructor(containerId, hiddenInputId, maxTags = 7, maxTagLength = 20) {
             this.container = document.getElementById(containerId);
@@ -116,12 +147,24 @@
             this.maxTags = maxTags;
             this.maxTagLength = maxTagLength;
             this.tags = [];
+            this.autocompleteContainer = null;
             this.init();
         }
         init() {
             this.textInput.addEventListener('keydown', (e) => this.handleKeyDown(e));
-            this.textInput.addEventListener('blur', () => this.addCurrentTag());
+            this.textInput.addEventListener('input', (e) => this.handleInput(e));
+            this.textInput.addEventListener('blur', () => {
+                setTimeout(() => this.hideAutocomplete(), 200);
+            });
+            this.createAutocompleteContainer();
             this.updateInputState();
+        }
+        createAutocompleteContainer() {
+            this.autocompleteContainer = document.createElement('div');
+            this.autocompleteContainer.className = 'tag-autocomplete';
+            this.autocompleteContainer.id = 'tag-autocomplete-' + Date.now();
+            this.container.style.position = 'relative';
+            this.container.appendChild(this.autocompleteContainer);
         }
         showToast(message, type = 'error') {
             const container = document.getElementById('toast-container');
@@ -144,15 +187,15 @@
             if (tag.startsWith('#')) tag = tag.substring(1);
             tag = tag.trim().toLowerCase();
             if (this.tags.includes(tag)) {
-                this.showToast(`Тег "${tag}" уже добавлен.`);
+                this.showToast(__('tag_exists', { tag: tag }));
                 return false;
             }
             if (tag.length > this.maxTagLength) {
-                this.showToast(`Тег "${tag}" длиннее ${this.maxTagLength} символов.`);
+                this.showToast(__('tag_too_long', { maxLength: this.maxTagLength }));
                 return false;
             }
             if (this.tags.length >= this.maxTags) {
-                this.showToast(`Нельзя добавить больше ${this.maxTags} тегов.`);
+                this.showToast(__('max_tags_reached', { maxTags: this.maxTags }));
                 return false;
             }
             return true;
@@ -167,6 +210,7 @@
             this.textInput.value = '';
             this.updateHiddenInput();
             this.updateInputState();
+            this.hideAutocomplete();
             return true;
         }
         removeTag(index) {
@@ -182,9 +226,75 @@
         handleKeyDown(e) {
             if (e.key === ',' || e.key === 'Enter') {
                 e.preventDefault();
+                const firstSuggestion = this.autocompleteContainer?.querySelector('.tag-suggestion');
+                if (firstSuggestion) {
+                    firstSuggestion.click();
+                    return;
+                }
                 this.addCurrentTag();
             } else if (e.key === 'Backspace' && this.textInput.value === '' && this.tags.length > 0) {
                 this.removeTag(this.tags.length - 1);
+            } else if (e.key === 'Escape') {
+                this.hideAutocomplete();
+            }
+        }
+        handleInput(e) {
+            const value = this.textInput.value;
+            if (value.includes('#')) {
+                this.textInput.value = value.replace(/#/g, '');
+                return;
+            }
+            const query = value.trim();
+            if (query.length < 1) {
+                this.hideAutocomplete();
+                return;
+            }
+            this.fetchAutocomplete(query);
+        }
+        fetchAutocomplete(query) {
+            fetch(`/api/tags/autocomplete?q=${encodeURIComponent(query)}`)
+                .then(res => res.json())
+                .then(tags => {
+                    if (tags.length === 0) {
+                        this.hideAutocomplete();
+                        return;
+                    }
+                    this.renderAutocomplete(tags, query);
+                })
+                .catch(() => this.hideAutocomplete());
+        }
+        renderAutocomplete(tags, query) {
+            const container = this.autocompleteContainer;
+            container.innerHTML = '';
+            tags.forEach(tag => {
+                const div = document.createElement('div');
+                div.className = 'tag-suggestion';
+                const idx = tag.toLowerCase().indexOf(query.toLowerCase());
+                let displayTag = tag;
+                if (idx !== -1) {
+                    const before = tag.substring(0, idx);
+                    const match = tag.substring(idx, idx + query.length);
+                    const after = tag.substring(idx + query.length);
+                    displayTag = before + '<span class="highlight">' + match + '</span>' + after;
+                }
+                div.innerHTML = displayTag;
+                div.dataset.tag = tag;
+                div.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    this.addTag(tag);
+                });
+                container.appendChild(div);
+            });
+            container.style.display = 'block';
+            const rect = this.textInput.getBoundingClientRect();
+            container.style.left = '0px';
+            container.style.top = (this.textInput.offsetHeight + 4) + 'px';
+            container.style.width = Math.max(200, rect.width - 16) + 'px';
+        }
+        hideAutocomplete() {
+            if (this.autocompleteContainer) {
+                this.autocompleteContainer.style.display = 'none';
+                this.autocompleteContainer.innerHTML = '';
             }
         }
         render() {
@@ -212,16 +322,16 @@
             if (this.tags.length >= this.maxTags) {
                 this.textInput.disabled = true;
                 this.textInput.classList.add('tag-input-disabled');
-                this.textInput.placeholder = 'Достигнут лимит тегов';
+                this.textInput.placeholder = __('tag_limit_reached');
             } else {
                 this.textInput.disabled = false;
                 this.textInput.classList.remove('tag-input-disabled');
-                this.textInput.placeholder = 'введите тег и нажмите запятую или Enter';
+                this.textInput.placeholder = __('tags_placeholder');
             }
         }
     }
 
-    // Управление файлами
+    // ======== УПРАВЛЕНИЕ ФАЙЛАМИ ========
     let selectedFiles = [];
 
     function updateFileList() {
@@ -264,7 +374,7 @@
         fileInput.addEventListener('change', (e) => {
             const files = Array.from(e.target.files);
             if (selectedFiles.length + files.length > 5) {
-                alert('Максимум 5 файлов');
+                alert(__('max_files_reached'));
                 return;
             }
             files.forEach(f => {
@@ -287,7 +397,7 @@
             dropZone.classList.remove('drag-over');
             const files = Array.from(e.dataTransfer.files);
             if (selectedFiles.length + files.length > 5) {
-                alert('Максимум 5 файлов');
+                alert(__('max_files_reached'));
                 return;
             }
             files.forEach(f => {
@@ -299,6 +409,7 @@
         });
     }
 
+    // ======== ИНИЦИАЛИЗАЦИЯ ========
     function initAskEditor() {
         const textarea = document.getElementById('content');
         if (!textarea) return;
@@ -335,12 +446,12 @@
             const content = easyMDE.value().trim();
 
             if (!title || !content) {
-                tagsInput.showToast('Заголовок и текст вопроса не могут быть пустыми.', 'error');
+                tagsInput.showToast(__('empty_title_content'), 'error');
                 e.preventDefault();
                 return false;
             }
             if (tagsInput.getTags().length > 7) {
-                tagsInput.showToast('Нельзя добавить больше 7 тегов.', 'error');
+                tagsInput.showToast(__('max_tags_reached', { maxTags: 7 }), 'error');
                 e.preventDefault();
                 return false;
             }

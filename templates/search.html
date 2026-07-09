@@ -1,14 +1,19 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="search-results">
-    <h1>Результаты поиска: "{{ query }}"</h1>
-    <p>Найдено вопросов: {{ questions|length }}</p>
+<div class="search-results-page">
+    <div class="search-header">
+        <h1 data-i18n="search_results">{{ _('Результаты поиска') }}</h1>
+        <div class="search-query-info">
+            <span class="query-text">"{{ query }}"</span>
+            <span class="results-count"><span data-i18n="found_questions">{{ _('Найдено вопросов') }}</span>: <strong>{{ questions|length }}</strong></span>
+        </div>
+    </div>
 
     {% if questions %}
         <div class="questions-list">
             {% for q in questions %}
-                <div class="question-card">
+                <div class="question-card" data-question-id="{{ q.id }}">
                     <div class="question-card-left">
                         <a href="{{ url_for('profile', user_id=q.user_id) }}" class="question-avatar-link">
                             {% if q.avatar %}
@@ -20,15 +25,17 @@
                     </div>
                     <div class="question-card-right">
                         <div class="question-stats">
-                            <span>{{ q.votes }} голосов</span>
-                            <span>{{ q.answer_count }} ответов</span>
-                            <span>{{ q.views }} просмотров</span>
+                            <span>{{ q.votes }} <span data-i18n="votes">{{ _('голосов') }}</span></span>
+                            <span>{{ q.answer_count }} <span data-i18n="answers">{{ _('ответов') }}</span></span>
+                            <span>{{ q.views }} <span data-i18n="views">{{ _('просмотров') }}</span></span>
                         </div>
                         <div class="question-title">
-                            <a href="{{ url_for('question_detail', question_id=q.id) }}">{{ q.title }}</a>
+                            <a href="{{ url_for('question_detail', question_id=q.id) }}" class="search-result-link">
+                                {{ q.title }}
+                            </a>
                         </div>
                         <div class="question-meta">
-                            <span>Автор: <a href="{{ url_for('profile', user_id=q.user_id) }}">{{ q.nickname or 'Пользователь' }}</a></span>
+                            <span><span data-i18n="author">{{ _('Автор') }}</span>: <a href="{{ url_for('profile', user_id=q.user_id) }}">{{ q.nickname or _('Пользователь') }}</a></span>
                             <span>{{ q.created_at[:16] }}</span>
                         </div>
                         {% if q.tags %}
@@ -38,51 +45,264 @@
                                 {% endfor %}
                             </div>
                         {% endif %}
-                        <div class="question-snippet">{{ q.content[:150] }}{% if q.content|length > 150 %}...{% endif %}</div>
+                        <div class="question-snippet search-snippet">
+                            {{ q.content[:250] }}{% if q.content|length > 250 %}...{% endif %}
+                        </div>
                     </div>
                 </div>
             {% endfor %}
         </div>
     {% else %}
         <div class="empty-search">
-            <p>По вашему запросу ничего не найдено.</p>
-            <p>Попробуйте:</p>
-            <ul>
-                <li>Изменить ключевые слова</li>
-                <li>Использовать поиск по тегу: <code>#тег</code></li>
-                <li><a href="{{ url_for('ask_question') }}">Задать новый вопрос</a></li>
-            </ul>
+            <div class="empty-search-icon">🔍</div>
+            <h2 data-i18n="no_results">{{ _('Ничего не найдено') }}</h2>
+            <p><span data-i18n="no_results_for">{{ _('По вашему запросу') }}</span> <strong>"{{ query }}"</strong> <span data-i18n="no_results_found">{{ _('ничего не найдено.') }}</span></p>
+            <div class="empty-search-tips">
+                <p data-i18n="try_these">{{ _('Попробуйте:') }}</p>
+                <ul>
+                    <li data-i18n="try_different_keywords">{{ _('Изменить ключевые слова') }}</li>
+                    <li><span data-i18n="use_tag_search">{{ _('Использовать поиск по тегу') }}</span>: <code>#<span data-i18n="tag">{{ _('тег') }}</span></code></li>
+                    <li><a href="{{ url_for('ask_question') }}" data-i18n="ask_new_question">{{ _('Задать новый вопрос') }}</a></li>
+                </ul>
+            </div>
         </div>
     {% endif %}
+
+    <!-- Блок с популярными тегами -->
+    <div class="search-sidebar">
+        <div class="sidebar-card popular-hashtags">
+            <h3 data-i18n="popular_hashtags">{{ _('Популярные хэштеги') }}</h3>
+            <ul>
+                {% for tag in popular_tags %}
+                    <li>
+                        <a href="{{ url_for('tag_questions', tag_name=tag.name) }}">#{{ tag.name }}</a>
+                        <span class="tag-count">x {{ tag.count }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+            <a href="{{ url_for('all_tags') }}" class="all-tags-link"><span data-i18n="view_all">{{ _('Посмотреть все') }}</span> <span>→</span></a>
+        </div>
+    </div>
 </div>
 
 <style>
-    .search-results {
+    .search-results-page {
         max-width: 1200px;
         margin: 40px auto;
         padding: 0 20px;
     }
-    .search-results h1 {
-        color: #1a3a6e;
+    .search-header {
+        background: var(--bg-card);
+        border-radius: 16px;
+        padding: 24px 30px;
+        margin-bottom: 30px;
+        box-shadow: var(--shadow);
+        transition: background 0.3s ease;
+    }
+    .search-header h1 {
+        color: var(--text-link);
+        font-size: 28px;
         margin-bottom: 10px;
     }
+    .search-query-info {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+    .query-text {
+        background: var(--bg-hover);
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 16px;
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+    .results-count {
+        font-size: 15px;
+        color: var(--text-secondary);
+    }
+    .results-count strong {
+        color: var(--text-link);
+    }
+
+    .search-snippet {
+        color: var(--text-secondary);
+        line-height: 1.6;
+    }
+    .search-result-link .highlight,
+    .search-snippet .highlight {
+        background: #fbbf24;
+        color: #1a1a2e;
+        padding: 0 2px;
+        border-radius: 2px;
+        font-weight: 600;
+    }
+    body.dark-theme .search-result-link .highlight,
+    body.dark-theme .search-snippet .highlight {
+        background: #f59e0b;
+        color: #1a1a2e;
+    }
+
     .empty-search {
-        background: white;
-        border-radius: 16px;
-        padding: 40px;
+        background: var(--bg-card);
+        border-radius: 24px;
+        padding: 60px 40px;
         text-align: center;
+        box-shadow: var(--shadow);
+        transition: background 0.3s ease;
     }
-    .empty-search ul {
+    .empty-search-icon {
+        font-size: 64px;
+        margin-bottom: 20px;
+    }
+    .empty-search h2 {
+        color: var(--text-link);
+        font-size: 28px;
+        margin-bottom: 15px;
+    }
+    .empty-search p {
+        color: var(--text-secondary);
+        font-size: 16px;
+        margin-bottom: 10px;
+    }
+    .empty-search-tips {
+        margin-top: 25px;
+        padding-top: 25px;
+        border-top: 1px solid var(--border-light);
+    }
+    .empty-search-tips ul {
         list-style: none;
-        margin-top: 15px;
+        margin-top: 12px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
     }
-    .empty-search li {
-        margin: 8px 0;
+    .empty-search-tips li {
+        background: var(--bg-hover);
+        padding: 8px 18px;
+        border-radius: 20px;
+        font-size: 14px;
+        color: var(--text-secondary);
     }
-    .empty-search code {
-        background: #f4f4f4;
-        padding: 2px 6px;
-        border-radius: 4px;
+    .empty-search-tips code {
+        background: var(--code-bg);
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-family: monospace;
+        font-size: 13px;
+        color: #0b9cb5;
+    }
+    .empty-search-tips a {
+        color: #0b9cb5;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    .empty-search-tips a:hover {
+        text-decoration: underline;
+    }
+
+    .search-sidebar {
+        margin-top: 30px;
+    }
+    .search-sidebar .sidebar-card {
+        background: var(--bg-sidebar);
+        border-radius: 16px;
+        padding: 20px;
+        border: 1px solid var(--border-light);
+        transition: background 0.3s ease;
+    }
+    .search-sidebar .sidebar-card h3 {
+        font-size: 18px;
+        font-weight: bold;
+        color: var(--text-link);
+        margin-bottom: 15px;
+    }
+    .search-sidebar .sidebar-card ul {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 15px 0;
+    }
+    .search-sidebar .sidebar-card li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--border-light);
+    }
+    .search-sidebar .sidebar-card li a {
+        text-decoration: none;
+        color: var(--text-link);
+        font-size: 14px;
+    }
+    .search-sidebar .sidebar-card li a:hover {
+        color: #0b9cb5;
+    }
+    .search-sidebar .sidebar-card .tag-count {
+        font-size: 13px;
+        color: var(--text-muted);
+    }
+    .search-sidebar .all-tags-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        color: #0b9cb5;
+        text-decoration: none;
+    }
+    .search-sidebar .all-tags-link:hover span {
+        transform: translateX(4px);
+    }
+
+    @media (max-width: 768px) {
+        .search-header {
+            padding: 18px 20px;
+        }
+        .search-header h1 {
+            font-size: 24px;
+        }
+        .search-query-info {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .empty-search {
+            padding: 40px 20px;
+        }
+        .empty-search h2 {
+            font-size: 24px;
+        }
+        .empty-search-tips ul {
+            flex-direction: column;
+            align-items: center;
+        }
     }
 </style>
+
+<script>
+    (function() {
+        // ======== ПОДСВЕТКА НАЙДЕННЫХ СЛОВ ========
+        const query = "{{ query }}";
+        if (query) {
+            const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp('(' + escapedQuery + ')', 'gi');
+
+            document.querySelectorAll('.search-result-link').forEach(link => {
+                const originalText = link.textContent;
+                const highlighted = originalText.replace(regex, '<span class="highlight">$1</span>');
+                link.innerHTML = highlighted;
+            });
+
+            document.querySelectorAll('.search-snippet').forEach(snippet => {
+                const originalText = snippet.textContent;
+                const highlighted = originalText.replace(regex, '<span class="highlight">$1</span>');
+                snippet.innerHTML = highlighted;
+            });
+        }
+
+        console.log('✅ Search page initialized with highlighting and localization');
+    })();
+</script>
 {% endblock %}

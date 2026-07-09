@@ -1,14 +1,17 @@
 {% extends "base.html" %}
 
 {% block content %}
-<!-- Hero-блок -->
+<!-- Hero-блок с типинг-эффектом -->
 <section class="hero">
     <div class="hero__container">
         <div class="hero__text">
-            <div class="hero-title">Позвольте приветствовать вас в кругу тех, кто искренне верит в ваш успех!</div>
-            <div class="hero-description">
-                Позвольте приветствовать вас в кругу тех, кто искренне верит в ваш успех! Примите участие в сообществе семи тысяч с лишним выпускников — Финуниверситета и других почтенных заведений — и воспользуйтесь бесценными советами о карьере от изысканных знатоков из самых именитых компаний:
+            <div class="hero-title" id="typing-title">
+                <span class="code-block">
+                    <span id="typing-text" data-full-text="{{ hero_title }}"></span>
+                    <span class="cursor"></span>
+                </span>
             </div>
+            <div class="hero-description" data-i18n="hero_subtitle">{{ hero_subtitle }}</div>
         </div>
         <div class="company-logos">
             <a href="https://yandex.com" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/commons/6/65/Yandex_official_logo.svg" alt="Яндекс" class="company-logo"></a>
@@ -20,11 +23,11 @@
         </div>
         <div class="hero__buttons">
             {% if user_id %}
-                <a href="{{ url_for('ask_question') }}" class="btn-hero-primary small">Задать вопрос</a>
+                <a href="{{ url_for('ask_question') }}" class="btn-hero-primary small" data-i18n="ask_question_hero">{{ _('Задать вопрос') }}</a>
             {% else %}
-                <a href="{{ url_for('login') }}" class="btn-hero-primary small">Зарегистрироваться</a>
+                <a href="{{ url_for('login') }}" class="btn-hero-primary small" data-i18n="register_hero">{{ _('Зарегистрироваться') }}</a>
             {% endif %}
-            <a href="{{ url_for('mission') }}" class="btn-hero-secondary small">Узнать больше</a>
+            <a href="{{ url_for('mission') }}" class="btn-hero-secondary small" data-i18n="learn_more">{{ _('Узнать больше') }}</a>
         </div>
     </div>
 </section>
@@ -41,16 +44,17 @@
                         <span>{{ user_nickname[0]|upper if user_nickname else '?' }}</span>
                     {% endif %}
                 </div>
-                <div class="ask-invitation__text">Что вы хотите спросить у специалистов?</div>
+                <div class="ask-invitation__text" data-i18n="what_to_ask">{{ _('Что вы хотите спросить у специалистов?') }}</div>
                 <div class="ask-invitation__arrow">→</div>
             </a>
         {% endif %}
 
         <div class="feed-header">
             <div class="feed-tabs">
-                <a href="{{ url_for('index', sort='new') }}" class="feed-tab {% if current_sort == 'new' %}active{% endif %}">Новые</a>
-                <a href="{{ url_for('index', sort='votes') }}" class="feed-tab {% if current_sort == 'votes' %}active{% endif %}">Популярные</a>
+                <a href="{{ url_for('index', sort='new', page=1) }}" class="feed-tab {% if current_sort == 'new' %}active{% endif %}" data-i18n="new">{{ _('Новые') }}</a>
+                <a href="{{ url_for('index', sort='votes', page=1) }}" class="feed-tab {% if current_sort == 'votes' %}active{% endif %}" data-i18n="popular">{{ _('Популярные') }}</a>
             </div>
+            <span class="total-count"><span data-i18n="total_questions">{{ _('Всего вопросов') }}</span>: {{ total_count }}</span>
         </div>
 
         <div class="questions-list">
@@ -67,18 +71,18 @@
                     </div>
                     <div class="question-card-right">
                         <div class="question-stats">
-                            <span>{{ q.votes }} голосов</span>
-                            <span>{{ q.answer_count }} ответов</span>
-                            <span>{{ q.views }} просмотров</span>
+                            <span>{{ q.votes }} <span data-i18n="votes">{{ _('голосов') }}</span></span>
+                            <span>{{ q.answer_count }} <span data-i18n="answers">{{ _('ответов') }}</span></span>
+                            <span>{{ q.views }} <span data-i18n="views">{{ _('просмотров') }}</span></span>
                         </div>
                         <div class="question-title">
                             <a href="{{ url_for('question_detail', question_id=q.id) }}">{{ q.title }}</a>
                         </div>
                         <div class="question-meta">
-                            <span>Автор: <a href="{{ url_for('profile', user_id=q.user_id) }}">{{ q.nickname or 'Пользователь' }}</a></span>
+                            <span><span data-i18n="author">{{ _('Автор') }}</span>: <a href="{{ url_for('profile', user_id=q.user_id) }}">{{ q.nickname or _('Пользователь') }}</a></span>
                             <span>{{ q.created_at[:16] }}</span>
                             {% if q.has_best_answer %}
-                                <span class="best-answer-label">Дан ответ</span>
+                                <span class="best-answer-label" data-i18n="best_answer">{{ _('Дан ответ') }}</span>
                             {% endif %}
                         </div>
                         {% if q.tags %}
@@ -93,18 +97,59 @@
                 </div>
             {% else %}
                 <div class="empty-feed">
-                    <p>Вопросов пока нет. Будьте первым!</p>
+                    <p data-i18n="no_questions">{{ _('Вопросов пока нет. Будьте первым!') }}</p>
                     {% if user_id %}
-                        <a href="{{ url_for('ask_question') }}" class="btn btn-primary">Задать вопрос</a>
+                        <a href="{{ url_for('ask_question') }}" class="btn btn-primary" data-i18n="ask_question">{{ _('Задать вопрос') }}</a>
                     {% endif %}
                 </div>
             {% endfor %}
         </div>
+
+        <!-- ======== ПАГИНАЦИЯ ======== -->
+        {% if total_pages > 1 %}
+            <div class="pagination-container">
+                <div class="pagination">
+                    <!-- Первая страница -->
+                    <a href="{{ url_for('index', sort=current_sort, page=1) }}" class="pagination-btn {% if page == 1 %}disabled{% endif %}" data-i18n-title="first_page">
+                        <span class="pagination-arrow">«</span>
+                    </a>
+
+                    <!-- Предыдущая страница -->
+                    <a href="{{ url_for('index', sort=current_sort, page=page-1 if page > 1 else 1) }}" class="pagination-btn {% if page == 1 %}disabled{% endif %}" data-i18n-title="prev_page">
+                        <span class="pagination-arrow">‹</span>
+                    </a>
+
+                    <!-- Поле с номером страницы -->
+                    <div class="pagination-page-input-wrapper">
+                        <input type="number" id="pagination-input" class="pagination-page-input"
+                               value="{{ page }}" min="1" max="{{ total_pages }}"
+                               data-total="{{ total_pages }}" data-sort="{{ current_sort }}"
+                               data-i18n-title="enter_page">
+                        <span class="pagination-total">/ {{ total_pages }}</span>
+                    </div>
+
+                    <!-- Следующая страница -->
+                    <a href="{{ url_for('index', sort=current_sort, page=page+1 if page < total_pages else total_pages) }}" class="pagination-btn {% if page == total_pages %}disabled{% endif %}" data-i18n-title="next_page">
+                        <span class="pagination-arrow">›</span>
+                    </a>
+
+                    <!-- Последняя страница -->
+                    <a href="{{ url_for('index', sort=current_sort, page=total_pages) }}" class="pagination-btn {% if page == total_pages %}disabled{% endif %}" data-i18n-title="last_page">
+                        <span class="pagination-arrow">»</span>
+                    </a>
+                </div>
+                <div class="pagination-info">
+                    <span data-i18n="showing">{{ _('Показано') }}</span>
+                    {{ (page - 1) * 10 + 1 }}–{{ [page * 10, total_count]|min }}
+                    <span data-i18n="of">{{ _('из') }}</span> {{ total_count }}
+                </div>
+            </div>
+        {% endif %}
     </div>
 
     <div class="feed-right">
         <div class="sidebar-card">
-            <h3>Активные участники</h3>
+            <h3 data-i18n="active_users">{{ _('Активные участники') }}</h3>
             <div class="active-users">
                 {% for user in active_users %}
                     <a href="{{ url_for('profile', user_id=user.id) }}" class="active-user">
@@ -117,7 +162,7 @@
                         </div>
                         <div class="active-user__info">
                             <span class="active-user__name">{{ user.nickname }}</span>
-                            <span class="active-user__activity">{{ user.activity }} ответов и вопросов</span>
+                            <span class="active-user__activity">{{ user.activity }} <span data-i18n="responses_and_questions">{{ _('ответов и вопросов') }}</span></span>
                         </div>
                     </a>
                 {% endfor %}
@@ -125,14 +170,14 @@
         </div>
 
         <div class="sidebar-card mission-teaser">
-            <p>CareerVibe здесь, чтобы помочь вам достичь ваших целей. Получите ответы на карьерные вопросы от профессионалов.</p>
+            <p data-i18n="mission_teaser">{{ _('CareerVibe здесь, чтобы помочь вам достичь ваших целей. Получите ответы на карьерные вопросы от профессионалов.') }}</p>
             <a href="{{ url_for('mission') }}" class="mission-link">
-                Узнайте, как CareerVibe может вас поддержать <span>→</span>
+                <span data-i18n="learn_how">{{ _('Узнайте, как CareerVibe может вас поддержать') }}</span> <span>→</span>
             </a>
         </div>
 
         <div class="sidebar-card popular-hashtags">
-            <h3>Популярные хэштеги</h3>
+            <h3 data-i18n="popular_hashtags">{{ _('Популярные хэштеги') }}</h3>
             <ul>
                 {% for tag in popular_tags %}
                     <li>
@@ -141,8 +186,307 @@
                     </li>
                 {% endfor %}
             </ul>
-            <a href="{{ url_for('all_tags') }}" class="all-tags-link">Посмотреть все <span>→</span></a>
+            <a href="{{ url_for('all_tags') }}" class="all-tags-link"><span data-i18n="view_all">{{ _('Посмотреть все') }}</span> <span>→</span></a>
         </div>
     </div>
 </div>
+
+<style>
+    .best-answer-label {
+        background: #10b981;
+        color: white;
+        padding: 2px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        display: inline-block;
+    }
+    .empty-feed {
+        text-align: center;
+        padding: 60px 20px;
+        background: var(--bg-card);
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+    }
+    .empty-feed p {
+        font-size: 18px;
+        color: var(--text-secondary);
+        margin-bottom: 20px;
+    }
+
+    .feed-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .total-count {
+        font-size: 14px;
+        color: var(--text-muted);
+    }
+
+    /* ======== ПАГИНАЦИЯ ======== */
+    .pagination-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        margin-top: 30px;
+        padding: 20px;
+        background: var(--bg-card);
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+        transition: background 0.3s ease;
+    }
+    .pagination {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .pagination-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 42px;
+        height: 42px;
+        padding: 0 12px;
+        border-radius: 10px;
+        background: var(--bg-hover);
+        color: var(--text-link);
+        text-decoration: none;
+        font-size: 16px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        border: 1px solid var(--border-light);
+        cursor: pointer;
+        user-select: none;
+    }
+    .pagination-btn:hover:not(.disabled) {
+        background: #0b9cb5;
+        color: white;
+        border-color: #0b9cb5;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(11,156,181,0.25);
+    }
+    .pagination-btn.disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+    .pagination-btn.active {
+        background: #0b9cb5;
+        color: white;
+        border-color: #0b9cb5;
+    }
+    .pagination-arrow {
+        font-size: 20px;
+        line-height: 1;
+    }
+
+    .pagination-page-input-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        background: var(--bg-hover);
+        border-radius: 10px;
+        padding: 0 6px 0 12px;
+        border: 1px solid var(--border-light);
+        transition: border-color 0.2s, background 0.3s;
+    }
+    .pagination-page-input-wrapper:focus-within {
+        border-color: #0b9cb5;
+        box-shadow: 0 0 0 3px rgba(11,156,181,0.1);
+    }
+    .pagination-page-input {
+        width: 56px;
+        height: 40px;
+        padding: 0 4px;
+        border: none;
+        background: transparent;
+        font-size: 16px;
+        font-weight: 600;
+        text-align: center;
+        color: var(--text-primary);
+        outline: none;
+        -moz-appearance: textfield;
+    }
+    .pagination-page-input::-webkit-outer-spin-button,
+    .pagination-page-input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    .pagination-total {
+        font-size: 14px;
+        color: var(--text-muted);
+        font-weight: 500;
+        padding-right: 8px;
+    }
+    .pagination-info {
+        font-size: 13px;
+        color: var(--text-muted);
+    }
+
+    /* Тёмная тема для пагинации */
+    body.dark-theme .pagination-container {
+        background: var(--bg-card);
+    }
+    body.dark-theme .pagination-btn {
+        background: var(--bg-hover);
+        border-color: var(--border-color);
+    }
+    body.dark-theme .pagination-btn:hover:not(.disabled) {
+        background: #0b9cb5;
+        border-color: #0b9cb5;
+    }
+    body.dark-theme .pagination-page-input-wrapper {
+        background: var(--bg-hover);
+        border-color: var(--border-color);
+    }
+    body.dark-theme .pagination-page-input {
+        color: var(--text-primary);
+    }
+
+    @media (max-width: 768px) {
+        .pagination-container {
+            padding: 16px;
+        }
+        .pagination-btn {
+            min-width: 36px;
+            height: 36px;
+            font-size: 14px;
+            padding: 0 8px;
+        }
+        .pagination-page-input {
+            width: 44px;
+            height: 34px;
+            font-size: 14px;
+        }
+        .pagination-total {
+            font-size: 13px;
+        }
+        .pagination-info {
+            font-size: 12px;
+        }
+        .feed-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+    @media (max-width: 480px) {
+        .pagination {
+            gap: 4px;
+        }
+        .pagination-btn {
+            min-width: 32px;
+            height: 32px;
+            font-size: 13px;
+            padding: 0 6px;
+            border-radius: 8px;
+        }
+        .pagination-page-input {
+            width: 38px;
+            height: 30px;
+            font-size: 13px;
+        }
+        .pagination-page-input-wrapper {
+            padding: 0 4px 0 8px;
+        }
+        .pagination-total {
+            font-size: 12px;
+            padding-right: 4px;
+        }
+        .pagination-arrow {
+            font-size: 16px;
+        }
+    }
+</style>
+
+<script>
+    (function() {
+        // ======== ТИПИНГ-ЭФФЕКТ ДЛЯ ЗАГОЛОВКА ========
+        const textElement = document.getElementById('typing-text');
+        const cursorElement = document.querySelector('.cursor');
+        let fullText = textElement ? textElement.getAttribute('data-full-text') || "{{ hero_title }}" : "";
+        let charIndex = 0;
+        let isTypingComplete = false;
+        let typingInterval = null;
+
+        function typeText() {
+            if (charIndex < fullText.length) {
+                textElement.textContent += fullText.charAt(charIndex);
+                charIndex++;
+                const delay = 80 + Math.random() * 40;
+                typingInterval = setTimeout(typeText, delay);
+            } else {
+                isTypingComplete = true;
+            }
+        }
+
+        window.restartTyping = function(newText) {
+            if (newText && newText !== fullText) {
+                fullText = newText;
+                textElement.textContent = '';
+                charIndex = 0;
+                isTypingComplete = false;
+                clearTimeout(typingInterval);
+                setTimeout(typeText, 300);
+            }
+        };
+
+        if (textElement) {
+            const observer = new MutationObserver(() => {
+                const newFullText = textElement.getAttribute('data-full-text');
+                if (newFullText && newFullText !== fullText) {
+                    window.restartTyping(newFullText);
+                }
+            });
+            observer.observe(textElement, { attributes: true, attributeFilter: ['data-full-text'] });
+        }
+
+        setTimeout(typeText, 500);
+
+        const titleContainer = document.getElementById('typing-title');
+        if (titleContainer) {
+            titleContainer.addEventListener('mouseenter', function() {
+                if (!isTypingComplete) {
+                    clearTimeout(typingInterval);
+                    if (charIndex < fullText.length) {
+                        textElement.textContent = fullText;
+                        charIndex = fullText.length;
+                        isTypingComplete = true;
+                    }
+                }
+            });
+        }
+
+        // ======== ПАГИНАЦИЯ: ВВОД НОМЕРА СТРАНИЦЫ ========
+        const paginationInput = document.getElementById('pagination-input');
+        if (paginationInput) {
+            const totalPages = parseInt(paginationInput.dataset.total) || 1;
+            const sort = paginationInput.dataset.sort || 'new';
+
+            paginationInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    let page = parseInt(this.value);
+                    if (isNaN(page) || page < 1) page = 1;
+                    if (page > totalPages) page = totalPages;
+                    // ИСПРАВЛЕНО: используем корневой маршрут
+                    window.location.href = `/?sort=${sort}&page=${page}`;
+                }
+            });
+
+            paginationInput.addEventListener('blur', function() {
+                let page = parseInt(this.value);
+                if (isNaN(page) || page < 1) page = 1;
+                if (page > totalPages) page = totalPages;
+                this.value = page;
+            });
+        }
+
+        console.log('✅ Typing effect initialized with restart support');
+        console.log('✅ Pagination initialized with fixed URL');
+    })();
+</script>
 {% endblock %}

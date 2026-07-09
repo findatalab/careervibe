@@ -1,18 +1,158 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ session.get('lang', 'ru') }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>CareerVibe — карьерный нетворкинг</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script>
+        // ======== ЗАГРУЗКА ПЕРЕВОДОВ ========
+        const translations = {};
+        let currentLang = localStorage.getItem('careervibe-lang') || 'ru';
+
+        async function loadTranslations(lang) {
+            try {
+                const response = await fetch(`/static/locales/${lang}.json`);
+                if (!response.ok) throw new Error('Translation not found');
+                const data = await response.json();
+                Object.assign(translations, data);
+                currentLang = lang;
+                return true;
+            } catch (e) {
+                console.warn('Failed to load translations for', lang);
+                return false;
+            }
+        }
+
+        function __(key, params = {}) {
+            let text = translations[key] || key;
+            for (const [k, v] of Object.entries(params)) {
+                text = text.replace(new RegExp(`{${k}}`, 'g'), v);
+            }
+            return text;
+        }
+
+        // ======== ПРИМЕНЕНИЕ ПЕРЕВОДОВ ========
+        function applyTranslations() {
+            if (Object.keys(translations).length === 0) {
+                console.warn('Translations not loaded yet');
+                return;
+            }
+
+            // Элементы с data-i18n (текст)
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (key) {
+                    let params = {};
+                    try {
+                        const paramsAttr = el.getAttribute('data-i18n-params');
+                        if (paramsAttr) params = JSON.parse(paramsAttr);
+                    } catch (e) {}
+                    el.textContent = __(key, params);
+                }
+            });
+
+            // Плейсхолдеры
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (key) {
+                    el.placeholder = __(key);
+                }
+            });
+
+            // Атрибуты title (подсказки)
+            document.querySelectorAll('[data-i18n-title]').forEach(el => {
+                const key = el.getAttribute('data-i18n-title');
+                if (key) {
+                    el.title = __(key);
+                }
+            });
+
+            // Обновление динамического заголовка (типинг-эффект)
+            const typingText = document.getElementById('typing-text');
+            if (typingText) {
+                const key = 'hero_title';
+                const newText = __(key);
+                const currentFullText = typingText.getAttribute('data-full-text');
+                if (newText !== currentFullText) {
+                    typingText.setAttribute('data-full-text', newText);
+                    if (window.restartTyping) {
+                        window.restartTyping(newText);
+                    } else {
+                        typingText.textContent = newText;
+                    }
+                }
+            }
+
+            // Подзаголовок hero
+            const heroSubtitle = document.querySelector('.hero-description');
+            if (heroSubtitle && heroSubtitle.hasAttribute('data-i18n')) {
+                const key = heroSubtitle.getAttribute('data-i18n');
+                heroSubtitle.textContent = __(key);
+            }
+
+            // Счётчик тегов
+            const tagCounter = document.getElementById('totalTagsCount');
+            if (tagCounter && window.updateTagCounter) {
+                window.updateTagCounter();
+            }
+
+            console.log('✅ Translations applied for language:', currentLang);
+        }
+
+        // ======== ПЕРЕКЛЮЧЕНИЕ ЯЗЫКА ========
+        async function setLanguage(lang) {
+            localStorage.setItem('careervibe-lang', lang);
+            currentLang = lang;
+
+            document.querySelectorAll('.lang-flag-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === lang);
+            });
+
+            const success = await loadTranslations(lang);
+            if (success) {
+                applyTranslations();
+                const searchInput = document.getElementById('search-input');
+                if (searchInput) {
+                    searchInput.placeholder = __('search_placeholder');
+                }
+            }
+
+            fetch('/set_language/' + lang, {
+                method: 'GET',
+                credentials: 'same-origin'
+            }).catch(() => {});
+        }
+
+        // ======== ДЕЛАЕМ ФУНКЦИИ ГЛОБАЛЬНЫМИ ========
+        window.__ = __;
+        window.applyTranslations = applyTranslations;
+        window.setLanguage = setLanguage;
+        window.loadTranslations = loadTranslations;
+
+        // ======== ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ DOM ========
+        document.addEventListener('DOMContentLoaded', function() {
+            const lang = localStorage.getItem('careervibe-lang') || 'ru';
+            if (['ru', 'en'].includes(lang)) {
+                document.documentElement.lang = lang;
+                loadTranslations(lang).then(() => {
+                    applyTranslations();
+                    // Активная кнопка языка
+                    document.querySelectorAll('.lang-flag-btn').forEach(btn => {
+                        btn.classList.toggle('active', btn.dataset.lang === lang);
+                    });
+                });
+            }
+        });
+    </script>
 </head>
 <body>
 <div class="page-container">
-    <!-- ШАПКА (sticky) -->
+    <!-- ШАПКА -->
     <header class="header sticky-header">
         <div class="header-inner">
             <div class="header-left">
-                <!-- Бургер-меню -->
                 <div class="burger-menu" id="burgerBtn">
                     <span></span>
                     <span></span>
@@ -23,9 +163,10 @@
                 </div>
             </div>
             <div class="header-search">
-                <form action="{{ url_for('search') }}" method="get">
-                    <input type="text" name="q" placeholder="Поиск по сайту..." value="{{ request.args.get('q', '') }}">
+                <form action="{{ url_for('search') }}" method="get" id="search-form">
+                    <input type="text" name="q" id="search-input" data-i18n-placeholder="search_placeholder" value="{{ request.args.get('q', '') }}" autocomplete="off">
                     <button type="submit">🔍</button>
+                    <div id="search-autocomplete" class="tag-autocomplete"></div>
                 </form>
             </div>
             <div class="header-right">
@@ -39,36 +180,49 @@
                             {% endif %}
                         </a>
                         <a href="{{ url_for('profile', user_id=user_id) }}" class="user-name">{{ user_nickname }}</a>
-                        <a href="{{ url_for('ask_question') }}" class="btn-ask-header">Задать вопрос</a>
-                        <a href="{{ url_for('logout') }}" class="logout-btn">Выйти</a>
+                        <a href="{{ url_for('ask_question') }}" class="btn-ask-header" data-i18n="ask_question">{{ _('Задать вопрос') }}</a>
+                        <a href="{{ url_for('logout') }}" class="logout-btn" data-i18n="logout">{{ _('Выйти') }}</a>
                     </div>
                 {% else %}
-                    <a href="{{ url_for('login') }}" class="btn-login-header">Войти</a>
-                    <a href="{{ url_for('login') }}" class="btn-register-header">Регистрация</a>
+                    <a href="{{ url_for('login') }}" class="btn-login-header" data-i18n="login">{{ _('Войти') }}</a>
+                    <a href="{{ url_for('login') }}" class="btn-register-header" data-i18n="register">{{ _('Регистрация') }}</a>
                 {% endif %}
             </div>
         </div>
 
-        <!-- Выпадающее меню для бургера -->
+        <!-- Бургер-меню -->
         <div class="burger-menu-dropdown" id="burgerDropdown">
             <div class="burger-menu-content">
                 <div class="burger-menu-section">
-                    <h4>Навигация</h4>
-                    <a href="{{ url_for('index') }}">Главная</a>
-                    <a href="{{ url_for('mission') }}">О проекте</a>
+                    <h4 data-i18n="navigation">{{ _('Навигация') }}</h4>
+                    <a href="{{ url_for('index') }}" data-i18n="home">{{ _('Главная') }}</a>
+                    <a href="{{ url_for('mission') }}" data-i18n="about">{{ _('О проекте') }}</a>
                     {% if user_id %}
-                        <a href="{{ url_for('ask_question') }}">Задать вопрос</a>
-                        <a href="{{ url_for('profile', user_id=user_id) }}">Мой профиль</a>
-                        <a href="{{ url_for('logout') }}">Выйти</a>
+                        <a href="{{ url_for('ask_question') }}" data-i18n="ask_question">{{ _('Задать вопрос') }}</a>
+                        <a href="{{ url_for('profile', user_id=user_id) }}" data-i18n="my_profile">{{ _('Мой профиль') }}</a>
+                        <a href="{{ url_for('logout') }}" data-i18n="logout">{{ _('Выйти') }}</a>
                     {% else %}
-                        <a href="{{ url_for('login') }}">Войти / Регистрация</a>
+                        <a href="{{ url_for('login') }}" data-i18n="login_register">{{ _('Войти / Регистрация') }}</a>
                     {% endif %}
                 </div>
                 <div class="burger-menu-section">
-                    <h4>Информация</h4>
-                    <a href="{{ url_for('help_page') }}">Помощь</a>
-                    <a href="{{ url_for('rules') }}">Правила сообщества</a>
-                    <a href="{{ url_for('contacts') }}">Контакты</a>
+                    <h4 data-i18n="information">{{ _('Информация') }}</h4>
+                    <a href="{{ url_for('help_page') }}" data-i18n="help">{{ _('Помощь') }}</a>
+                    <a href="{{ url_for('rules') }}" data-i18n="rules">{{ _('Правила сообщества') }}</a>
+                    <a href="{{ url_for('contacts') }}" data-i18n="contacts">{{ _('Контакты') }}</a>
+                    <a href="{{ url_for('all_tags') }}" data-i18n="all_tags">{{ _('Все теги') }}</a>
+                </div>
+
+                <div class="language-toggle-wrapper">
+                    <button class="lang-flag-btn {% if session.get('lang', 'ru') == 'ru' %}active{% endif %}" data-lang="ru" data-i18n-title="russian">🇷🇺</button>
+                    <button class="lang-flag-btn {% if session.get('lang') == 'en' %}active{% endif %}" data-lang="en" data-i18n-title="english">🇺🇸</button>
+                </div>
+
+                <div class="theme-toggle-wrapper">
+                    <button id="themeToggleBtn" class="theme-toggle-btn" data-i18n-title="change_theme">
+                        <span class="icon-sun">☀️</span>
+                        <span class="icon-moon">🌙</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -94,28 +248,28 @@
     <footer class="footer">
         <div class="footer-inner">
             <div class="footer-col">
-                <h4>О нас</h4>
-                <a href="{{ url_for('mission') }}">Миссия</a>
-                <a href="#">Наше влияние</a>
-                <a href="#">Команда</a>
-                <a href="#">Найм</a>
-                <a href="#">Блог</a>
-                <a href="#">Контакты</a>
-                <a href="#">ИИ ассистент</a>
+                <h4 data-i18n="about_us">{{ _('О нас') }}</h4>
+                <a href="{{ url_for('mission') }}" data-i18n="mission">{{ _('Миссия') }}</a>
+                <a href="#" data-i18n="our_impact">{{ _('Наше влияние') }}</a>
+                <a href="#" data-i18n="team">{{ _('Команда') }}</a>
+                <a href="#" data-i18n="hiring">{{ _('Найм') }}</a>
+                <a href="#" data-i18n="blog">{{ _('Блог') }}</a>
+                <a href="{{ url_for('contacts') }}" data-i18n="contacts">{{ _('Контакты') }}</a>
+                <a href="#" data-i18n="ai_assistant">{{ _('ИИ ассистент') }}</a>
             </div>
             <div class="footer-col">
-                <h4>Участникам</h4>
-                <a href="#">Для студентов</a>
-                <a href="#">Для профессионалов</a>
-                <a href="#">Для учителей</a>
-                <a href="#">Донат</a>
+                <h4 data-i18n="for_members">{{ _('Участникам') }}</h4>
+                <a href="#" data-i18n="for_students">{{ _('Для студентов') }}</a>
+                <a href="#" data-i18n="for_professionals">{{ _('Для профессионалов') }}</a>
+                <a href="#" data-i18n="for_teachers">{{ _('Для учителей') }}</a>
+                <a href="#" data-i18n="donate">{{ _('Донат') }}</a>
             </div>
             <div class="footer-col">
-                <h4>Более</h4>
-                <a href="#">Ресурсы для карьеры</a>
-                <a href="{{ url_for('rules') }}">Правила сообщества</a>
-                <a href="#">Условия использования</a>
-                <a href="#">Политика конфиденциальности</a>
+                <h4 data-i18n="more">{{ _('Более') }}</h4>
+                <a href="#" data-i18n="career_resources">{{ _('Ресурсы для карьеры') }}</a>
+                <a href="{{ url_for('rules') }}" data-i18n="community_rules">{{ _('Правила сообщества') }}</a>
+                <a href="#" data-i18n="terms">{{ _('Условия использования') }}</a>
+                <a href="#" data-i18n="privacy">{{ _('Политика конфиденциальности') }}</a>
             </div>
             <div class="footer-univ">
                 <a href="https://www.fa.ru" target="_blank" rel="noopener noreferrer" class="univ-logo-link">
@@ -124,12 +278,64 @@
                          class="univ-logo-img">
                 </a>
                 <div class="copyright">2026</div>
+
+                <div class="socials">
+                    <a href="https://t.me/finuniverchan" target="_blank" rel="noopener" class="social-link" aria-label="Telegram">
+                        <span class="social-link_icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <path fill="currentColor" d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3.003-2.214-1.446 1.392c-.16.16-.295.295-.605.295l.216-3.075 5.598-5.058c.244-.216-.053-.336-.378-.12L7.323 13.42l-2.948-.922c-.635-.198-.647-.635.138-.94l11.534-4.443c.528-.192 1.033.125.846.706z"/>
+                            </svg>
+                        </span>
+                        <span class="social-link_icon-hover">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <path fill="currentColor" d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3.003-2.214-1.446 1.392c-.16.16-.295.295-.605.295l.216-3.075 5.598-5.058c.244-.216-.053-.336-.378-.12L7.323 13.42l-2.948-.922c-.635-.198-.647-.635.138-.94l11.534-4.443c.528-.192 1.033.125.846.706z"/>
+                            </svg>
+                        </span>
+                    </a>
+                    <a href="https://vk.com/finuniversity" target="_blank" rel="noopener" class="social-link" aria-label="VK">
+                        <span class="social-link_icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <path fill="currentColor" d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm6.375 17.25h-1.875c-.75 0-.975-.75-2.175-1.875-1.125-.9-1.575-.975-1.875-.975-.375 0-.525.15-.525.6v1.65c0 .375-.15.6-.525.6h-2.55c-2.775 0-5.025-2.625-5.025-6.075v-1.65c0-.375.15-.6.525-.6h2.55c.375 0 .525.225.525.6v2.475c0 .525.375 1.275 1.125 1.275.75 0 1.125-.6 1.125-1.275V8.7c0-.375.15-.6.525-.6h2.55c.375 0 .525.225.525.6v4.275c0 .375.375.975 1.125.975.9 0 1.275-.75 1.275-1.275V8.7c0-.375.15-.6.525-.6h1.875c.375 0 .525.225.525.6v5.4c0 2.775-1.65 4.05-3.3 4.05z"/>
+                            </svg>
+                        </span>
+                        <span class="social-link_icon-hover">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <path fill="currentColor" d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm6.375 17.25h-1.875c-.75 0-.975-.75-2.175-1.875-1.125-.9-1.575-.975-1.875-.975-.375 0-.525.15-.525.6v1.65c0 .375-.15.6-.525.6h-2.55c-2.775 0-5.025-2.625-5.025-6.075v-1.65c0-.375.15-.6.525-.6h2.55c.375 0 .525.225.525.6v2.475c0 .525.375 1.275 1.125 1.275.75 0 1.125-.6 1.125-1.275V8.7c0-.375.15-.6.525-.6h2.55c.375 0 .525.225.525.6v4.275c0 .375.375.975 1.125.975.9 0 1.275-.75 1.275-1.275V8.7c0-.375.15-.6.525-.6h1.875c.375 0 .525.225.525.6v5.4c0 2.775-1.65 4.05-3.3 4.05z"/>
+                            </svg>
+                        </span>
+                    </a>
+                    <a href="https://github.com/findatalab" target="_blank" rel="noopener" class="social-link" aria-label="GitHub">
+                        <span class="social-link_icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <path fill="currentColor" d="M12 0C5.373 0 0 5.373 0 12c0 5.302 3.438 9.8 8.205 11.387.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.726-4.042-1.416-4.042-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.09-.745.082-.73.082-.73 1.205.085 1.838 1.237 1.838 1.237 1.07 1.834 2.807 1.304 3.492.997.108-.775.418-1.305.762-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.468-2.38 1.235-3.22-.123-.3-.535-1.52.117-3.16 0 0 1.008-.322 3.3 1.23.96-.267 1.98-.4 3-.4 1.02 0 2.04.133 3 .4 2.29-1.552 3.297-1.23 3.297-1.23.653 1.64.24 2.86.118 3.16.768.84 1.233 1.91 1.233 3.22 0 4.61-2.804 5.62-5.476 5.92.43.37.824 1.102.824 2.22 0 1.602-.015 2.894-.015 3.287 0 .322.216.694.825.577C20.565 21.795 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+                            </svg>
+                        </span>
+                        <span class="social-link_icon-hover">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <path fill="currentColor" d="M12 0C5.373 0 0 5.373 0 12c0 5.302 3.438 9.8 8.205 11.387.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.726-4.042-1.416-4.042-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.09-.745.082-.73.082-.73 1.205.085 1.838 1.237 1.838 1.237 1.07 1.834 2.807 1.304 3.492.997.108-.775.418-1.305.762-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.468-2.38 1.235-3.22-.123-.3-.535-1.52.117-3.16 0 0 1.008-.322 3.3 1.23.96-.267 1.98-.4 3-.4 1.02 0 2.04.133 3 .4 2.29-1.552 3.297-1.23 3.297-1.23.653 1.64.24 2.86.118 3.16.768.84 1.233 1.91 1.233 3.22 0 4.61-2.804 5.62-5.476 5.92.43.37.824 1.102.824 2.22 0 1.602-.015 2.894-.015 3.287 0 .322.216.694.825.577C20.565 21.795 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+                            </svg>
+                        </span>
+                    </a>
+                    <a href="https://www.youtube.com/@FinUniversity" target="_blank" rel="noopener" class="social-link" aria-label="YouTube">
+                        <span class="social-link_icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <path fill="currentColor" d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.98 16.44c-.21 1.07-1.03 1.89-2.1 2.1C14.57 18.85 12 18.85 12 18.85s-2.57 0-3.88-.31c-1.07-.21-1.89-1.03-2.1-2.1C5.71 15.14 5.71 12 5.71 12s0-3.14.31-4.44c.21-1.07 1.03-1.89 2.1-2.1C9.43 5.15 12 5.15 12 5.15s2.57 0 3.88.31c1.07.21 1.89 1.03 2.1 2.1.31 1.3.31 4.44.31 4.44s0 3.14-.31 4.44zM10.24 14.52l3.56-2.52-3.56-2.52v5.04z"/>
+                            </svg>
+                        </span>
+                        <span class="social-link_icon-hover">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <path fill="currentColor" d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.98 16.44c-.21 1.07-1.03 1.89-2.1 2.1C14.57 18.85 12 18.85 12 18.85s-2.57 0-3.88-.31c-1.07-.21-1.89-1.03-2.1-2.1C5.71 15.14 5.71 12 5.71 12s0-3.14.31-4.44c.21-1.07 1.03-1.89 2.1-2.1C9.43 5.15 12 5.15 12 5.15s2.57 0 3.88.31c1.07.21 1.89 1.03 2.1 2.1.31 1.3.31 4.44.31 4.44s0 3.14-.31 4.44zM10.24 14.52l3.56-2.52-3.56-2.52v5.04z"/>
+                            </svg>
+                        </span>
+                    </a>
+                </div>
             </div>
         </div>
     </footer>
 </div>
 
 <script>
+    // ======== TOASTS ========
     function showToast(message, type) {
         const container = document.getElementById('toast-container');
         if (!container) return;
@@ -144,10 +350,8 @@
         }, 4000);
     }
     if (window.flashMessages) window.flashMessages.forEach(msg => showToast(msg.message, msg.category));
-</script>
 
-<script>
-    // Бургер-меню с анимацией
+    // ======== БУРГЕР-МЕНЮ ========
     const burgerBtn = document.getElementById('burgerBtn');
     const burgerDropdown = document.getElementById('burgerDropdown');
     const overlay = document.createElement('div');
@@ -188,6 +392,128 @@
             closeMenu();
         }
     });
+
+    // ======== ПЕРЕКЛЮЧЕНИЕ ТЕМЫ ========
+    const themeBtn = document.getElementById('themeToggleBtn');
+
+    function setTheme(theme) {
+        if (theme === 'dark') {
+            document.documentElement.classList.add('dark-theme');
+            document.body.classList.add('dark-theme');
+            localStorage.setItem('careervibe-theme', 'dark');
+        } else {
+            document.documentElement.classList.remove('dark-theme');
+            document.body.classList.remove('dark-theme');
+            localStorage.setItem('careervibe-theme', 'light');
+        }
+    }
+
+    const savedTheme = localStorage.getItem('careervibe-theme');
+    if (savedTheme === 'dark') {
+        setTheme('dark');
+    }
+
+    themeBtn.addEventListener('click', function() {
+        const isDark = document.body.classList.contains('dark-theme');
+        setTheme(isDark ? 'light' : 'dark');
+    });
+
+    // ======== ПЕРЕКЛЮЧЕНИЕ ЯЗЫКА ========
+    const langButtons = document.querySelectorAll('.lang-flag-btn');
+
+    langButtons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const lang = this.dataset.lang;
+            if (lang) {
+                setLanguage(lang);
+            }
+        });
+    });
+
+    // ======== АВТОДОПОЛНЕНИЕ ТЕГОВ ========
+    const searchInput = document.getElementById('search-input');
+    const autocompleteContainer = document.getElementById('search-autocomplete');
+    let autocompleteTimeout = null;
+
+    if (searchInput && autocompleteContainer) {
+        searchInput.addEventListener('input', function() {
+            const value = this.value;
+            const hashIndex = value.lastIndexOf('#');
+            if (hashIndex === -1) {
+                autocompleteContainer.style.display = 'none';
+                autocompleteContainer.innerHTML = '';
+                return;
+            }
+            const query = value.substring(hashIndex + 1).trim();
+            if (query.length === 0) {
+                autocompleteContainer.style.display = 'none';
+                autocompleteContainer.innerHTML = '';
+                return;
+            }
+
+            clearTimeout(autocompleteTimeout);
+            autocompleteTimeout = setTimeout(() => {
+                fetch(`/api/tags/autocomplete?q=${encodeURIComponent(query)}`)
+                    .then(res => res.json())
+                    .then(tags => {
+                        if (tags.length === 0) {
+                            autocompleteContainer.style.display = 'none';
+                            autocompleteContainer.innerHTML = '';
+                            return;
+                        }
+                        autocompleteContainer.innerHTML = '';
+                        tags.forEach(tag => {
+                            const div = document.createElement('div');
+                            div.className = 'tag-suggestion';
+                            const idx = tag.toLowerCase().indexOf(query.toLowerCase());
+                            let displayTag = tag;
+                            if (idx !== -1) {
+                                const before = tag.substring(0, idx);
+                                const match = tag.substring(idx, idx + query.length);
+                                const after = tag.substring(idx + query.length);
+                                displayTag = before + '<span class="highlight">' + match + '</span>' + after;
+                            }
+                            div.innerHTML = '#' + displayTag;
+                            div.dataset.tag = tag;
+                            div.addEventListener('mousedown', function(e) {
+                                e.preventDefault();
+                                const fullTag = '#' + this.dataset.tag;
+                                const beforeHash = value.substring(0, hashIndex);
+                                searchInput.value = beforeHash + fullTag + ' ';
+                                autocompleteContainer.style.display = 'none';
+                                autocompleteContainer.innerHTML = '';
+                            });
+                            autocompleteContainer.appendChild(div);
+                        });
+                        autocompleteContainer.style.display = 'block';
+                        const rect = searchInput.getBoundingClientRect();
+                        autocompleteContainer.style.left = '0px';
+                        autocompleteContainer.style.top = (searchInput.offsetHeight + 2) + 'px';
+                        autocompleteContainer.style.width = Math.max(200, rect.width) + 'px';
+                    });
+            }, 300);
+        });
+
+        searchInput.addEventListener('blur', function() {
+            setTimeout(() => {
+                autocompleteContainer.style.display = 'none';
+                autocompleteContainer.innerHTML = '';
+            }, 200);
+        });
+
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const firstSuggestion = autocompleteContainer.querySelector('.tag-suggestion');
+                if (firstSuggestion) {
+                    e.preventDefault();
+                    firstSuggestion.click();
+                }
+            }
+        });
+    }
+
+    console.log('✅ Base.html loaded with full localization support');
 </script>
 </body>
 </html>

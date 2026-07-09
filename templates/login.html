@@ -5,44 +5,224 @@
     <div class="auth-container">
         <div class="auth-card">
             <div class="auth-icon">🔐</div>
-            <h2>Вход</h2>
-            <form method="post" action="{{ url_for('login') }}">
+            <h2 data-i18n="login">{{ _('Вход') }}</h2>
+            <form method="post" action="{{ url_for('login') }}" id="login-form" novalidate>
                 <input type="hidden" name="action" value="login">
                 <div class="auth-field">
-                    <label>Email или никнейм</label>
-                    <input type="text" name="login" placeholder="example@mail.ru или никнейм" required>
+                    <label data-i18n="email_or_nickname">{{ _('Email или никнейм') }}</label>
+                    <input type="text" name="login" data-i18n-placeholder="email_or_nickname_placeholder" required autocomplete="off">
                 </div>
                 <div class="auth-field">
-                    <label>Пароль</label>
-                    <input type="password" name="password" placeholder="••••••••" required>
+                    <label data-i18n="password">{{ _('Пароль') }}</label>
+                    <input type="password" name="password" data-i18n-placeholder="password_placeholder" required autocomplete="off">
                 </div>
-                <button type="submit" class="auth-btn auth-btn-primary">Войти</button>
+                <button type="submit" class="auth-btn auth-btn-primary" data-i18n="login">{{ _('Войти') }}</button>
             </form>
         </div>
         <div class="auth-card">
             <div class="auth-icon">📝</div>
-            <h2>Регистрация</h2>
-            <form method="post" action="{{ url_for('login') }}">
+            <h2 data-i18n="register">{{ _('Регистрация') }}</h2>
+            <form method="post" action="{{ url_for('login') }}" id="register-form" novalidate>
                 <input type="hidden" name="action" value="register">
                 <div class="auth-field">
-                    <label>Email</label>
-                    <input type="email" name="email" placeholder="example@mail.ru" required>
+                    <label data-i18n="email">{{ _('Email') }}</label>
+                    <input type="email" name="email" id="register-email" data-i18n-placeholder="email_placeholder" required
+                           pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" autocomplete="off">
+                    <small class="email-hint" data-i18n="email_domain_restricted">{{ _('Только домены .ru') }}</small>
                 </div>
                 <div class="auth-field">
-                    <label>Никнейм (будет виден всем)</label>
-                    <input type="text" name="nickname" placeholder="Ваш уникальный ник" required minlength="3">
+                    <label data-i18n="nickname">{{ _('Никнейм (будет виден всем)') }}</label>
+                    <input type="text" name="nickname" data-i18n-placeholder="nickname_placeholder" required minlength="3" autocomplete="off">
                 </div>
                 <div class="auth-field">
-                    <label>Пароль</label>
-                    <input type="password" name="password" placeholder="минимум 4 символа" required minlength="4">
+                    <label data-i18n="password">{{ _('Пароль') }}</label>
+                    <input type="password" name="password" id="register-password" data-i18n-placeholder="password_min_placeholder" required minlength="4" autocomplete="off">
                 </div>
                 <div class="auth-field">
-                    <label>Подтверждение пароля</label>
-                    <input type="password" name="confirm_password" placeholder="повторите пароль" required>
+                    <label data-i18n="confirm_password">{{ _('Подтверждение пароля') }}</label>
+                    <input type="password" name="confirm_password" id="register-confirm" data-i18n-placeholder="confirm_password_placeholder" required autocomplete="off">
                 </div>
-                <button type="submit" class="auth-btn auth-btn-secondary">Зарегистрироваться</button>
+                <button type="submit" class="auth-btn auth-btn-secondary" data-i18n="register">{{ _('Зарегистрироваться') }}</button>
             </form>
         </div>
     </div>
 </div>
+
+<style>
+    .auth-icon {
+        text-align: center;
+        font-size: 48px;
+        margin-bottom: 10px;
+    }
+    .auth-field small {
+        display: block;
+        margin-top: 4px;
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+    .email-hint.error {
+        color: var(--toast-error);
+    }
+    .email-hint.success {
+        color: var(--toast-success);
+    }
+    .auth-field .field-error {
+        color: var(--toast-error);
+        font-size: 12px;
+        margin-top: 4px;
+        display: none;
+    }
+    .auth-field .field-error.show {
+        display: block;
+    }
+    .auth-field input:invalid {
+        border-color: var(--toast-error);
+    }
+    .auth-field input:valid {
+        border-color: var(--toast-success);
+    }
+</style>
+
+<script>
+    (function() {
+        // ======== ВАЛИДАЦИЯ EMAIL (клиентская) ========
+        const emailInput = document.getElementById('register-email');
+        const emailHint = document.querySelector('.email-hint');
+        const registerForm = document.getElementById('register-form');
+
+        // Регулярное выражение для email (HTML5-стандарт)
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+        // Проверка на .ru-домен
+        function isRuDomain(email) {
+            return email.toLowerCase().endsWith('.ru');
+        }
+
+        function validateEmail(email) {
+            if (!email) return { valid: false, message: __('email_required') };
+            if (!emailRegex.test(email)) {
+                return { valid: false, message: __('email_invalid') };
+            }
+            if (!isRuDomain(email)) {
+                return {
+                    valid: false,
+                    message: __('email_domain_restricted')
+                };
+            }
+            return { valid: true, message: __('email_valid') };
+        }
+
+        if (emailInput) {
+            emailInput.addEventListener('input', function() {
+                const email = this.value.trim();
+                const result = validateEmail(email);
+
+                if (email.length === 0) {
+                    emailHint.textContent = __('email_domain_restricted');
+                    emailHint.className = 'email-hint';
+                    this.setCustomValidity('');
+                    return;
+                }
+
+                if (!result.valid) {
+                    emailHint.textContent = result.message;
+                    emailHint.className = 'email-hint error';
+                    this.setCustomValidity(result.message);
+                } else {
+                    emailHint.textContent = '✓ ' + result.message;
+                    emailHint.className = 'email-hint success';
+                    this.setCustomValidity('');
+                }
+            });
+
+            emailInput.addEventListener('blur', function() {
+                const email = this.value.trim();
+                if (email.length > 0) {
+                    const result = validateEmail(email);
+                    if (!result.valid) {
+                        this.focus();
+                    }
+                }
+            });
+        }
+
+        // ======== ВАЛИДАЦИЯ ПАРОЛЯ ========
+        const passwordInput = document.getElementById('register-password');
+        const confirmInput = document.getElementById('register-confirm');
+
+        function validatePasswords() {
+            if (!passwordInput || !confirmInput) return;
+            const pwd = passwordInput.value;
+            const conf = confirmInput.value;
+
+            if (conf.length === 0) {
+                confirmInput.setCustomValidity('');
+                return;
+            }
+
+            if (pwd !== conf) {
+                confirmInput.setCustomValidity(__('password_mismatch'));
+            } else {
+                confirmInput.setCustomValidity('');
+            }
+        }
+
+        if (passwordInput) {
+            passwordInput.addEventListener('input', validatePasswords);
+        }
+        if (confirmInput) {
+            confirmInput.addEventListener('input', validatePasswords);
+        }
+
+        // ======== ПРОВЕРКА ФОРМЫ ПЕРЕД ОТПРАВКОЙ ========
+        if (registerForm) {
+            registerForm.addEventListener('submit', function(e) {
+                const email = emailInput.value.trim();
+                const result = validateEmail(email);
+
+                if (!result.valid) {
+                    e.preventDefault();
+                    showToast(result.message, 'error');
+                    emailInput.focus();
+                    return false;
+                }
+
+                const pwd = passwordInput.value;
+                const conf = confirmInput.value;
+                if (pwd !== conf) {
+                    e.preventDefault();
+                    showToast(__('password_mismatch'), 'error');
+                    confirmInput.focus();
+                    return false;
+                }
+
+                if (pwd.length < 4) {
+                    e.preventDefault();
+                    showToast(__('password_too_short'), 'error');
+                    passwordInput.focus();
+                    return false;
+                }
+
+                return true;
+            });
+        }
+
+        // ======== ФОРМА ВХОДА ========
+        const loginForm = document.getElementById('login-form');
+        if (loginForm) {
+            loginForm.addEventListener('submit', function(e) {
+                const login = this.querySelector('input[name="login"]');
+                const password = this.querySelector('input[name="password"]');
+                if (!login.value.trim() || !password.value.trim()) {
+                    e.preventDefault();
+                    showToast(__('fill_all_fields'), 'error');
+                    return false;
+                }
+                return true;
+            });
+        }
+
+        console.log('✅ Login page initialized with email validation (.ru only) and localization');
+    })();
+</script>
 {% endblock %}

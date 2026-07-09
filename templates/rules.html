@@ -3,111 +3,122 @@
 {% block content %}
 <div class="rules-page">
     <div class="rules-hero">
-        <h1>Правила сообщества</h1>
-        <p>Уважение, профессионализм и конструктивность — основа нашей платформы</p>
+        <h1 data-i18n="rules_title">{{ _('Правила сообщества') }}</h1>
+        <p data-i18n="rules_subtitle">{{ _('Уважение, профессионализм и конструктивность — основа нашей платформы') }}</p>
     </div>
 
     <div class="rules-content">
         <div class="rules-block">
-            <h2>1. Общие принципы</h2>
+            <h2>1. <span data-i18n="general_principles">{{ _('Общие принципы') }}</span></h2>
             <ul>
-                <li>Будьте вежливы и уважайте других участников.</li>
-                <li>Помогайте тем, кто обращается за советом.</li>
-                <li>Делитесь профессиональным опытом и знаниями.</li>
-                <li>Критикуйте конструктивно, без перехода на личности.</li>
+                <li data-i18n="principle_1">{{ _('Будьте вежливы и уважайте других участников.') }}</li>
+                <li data-i18n="principle_2">{{ _('Помогайте тем, кто обращается за советом.') }}</li>
+                <li data-i18n="principle_3">{{ _('Делитесь профессиональным опытом и знаниями.') }}</li>
+                <li data-i18n="principle_4">{{ _('Критикуйте конструктивно, без перехода на личности.') }}</li>
             </ul>
         </div>
 
         <div class="rules-block">
-            <h2>2. Запрещённые действия</h2>
+            <h2>2. <span data-i18n="prohibited_actions">{{ _('Запрещённые действия') }}</span></h2>
             <ul>
-                <li>Оскорбления, грубость, агрессия в любой форме.</li>
-                <li>Спам, реклама, ссылки на сторонние ресурсы без разрешения.</li>
-                <li>Публикация личной информации других людей без их согласия.</li>
-                <li>Размещение вредоносного ПО, фишинговых ссылок.</li>
-                <li>Нарушение авторских прав — копирование чужих ответов без указания источника.</li>
-                <li>Многократное дублирование вопросов и ответов.</li>
+                <li data-i18n="prohibited_1">{{ _('Оскорбления, грубость, агрессия в любой форме.') }}</li>
+                <li data-i18n="prohibited_2">{{ _('Спам, реклама, ссылки на сторонние ресурсы без разрешения.') }}</li>
+                <li data-i18n="prohibited_3">{{ _('Публикация личной информации других людей без их согласия.') }}</li>
+                <li data-i18n="prohibited_4">{{ _('Размещение вредоносного ПО, фишинговых ссылок.') }}</li>
+                <li data-i18n="prohibited_5">{{ _('Нарушение авторских прав — копирование чужих ответов без указания источника.') }}</li>
+                <li data-i18n="prohibited_6">{{ _('Многократное дублирование вопросов и ответов.') }}</li>
             </ul>
         </div>
 
         <div class="rules-block">
-            <h2>3. Создание вопросов</h2>
+            <h2>3. <span data-i18n="creating_questions">{{ _('Создание вопросов') }}</span></h2>
             <ul>
-                <li>Формулируйте заголовок чётко и по существу.</li>
-                <li>Описывайте проблему подробно, указывайте контекст.</li>
-                <li>Добавляйте релевантные теги для правильной категоризации.</li>
-                <li>Не задавайте вопросы, которые уже были заданы — сначала воспользуйтесь поиском.</li>
-                <li>Запрещены вопросы, нарушающие законодательство РФ.</li>
+                <li data-i18n="creating_questions_1">{{ _('Формулируйте заголовок чётко и по существу.') }}</li>
+                <li data-i18n="creating_questions_2">{{ _('Описывайте проблему подробно, указывайте контекст.') }}</li>
+                <li data-i18n="creating_questions_3">{{ _('Добавляйте релевантные теги для правильной категоризации.') }}</li>
+                <li data-i18n="creating_questions_4">{{ _('Не задавайте вопросы, которые уже были заданы — сначала воспользуйтесь поиском.') }}</li>
+                <li data-i18n="creating_questions_5">{{ _('Запрещены вопросы, нарушающие законодательство РФ.') }}</li>
             </ul>
         </div>
 
         <div class="rules-block">
-            <h2>4. Написание ответов</h2>
+            <h2>4. <span data-i18n="writing_answers">{{ _('Написание ответов') }}</span></h2>
             <ul>
-                <li>Отвечайте по существу вопроса, не уходите в офтоп.</li>
-                <li>Аргументируйте свою точку зрения, приводите примеры.</li>
-                <li>Не публикуйте ответы, содержащие только ссылки — добавьте пояснение.</li>
-                <li>Если ошиблись — исправьте ответ или укажите на ошибку в комментарии.</li>
+                <li data-i18n="writing_answers_1">{{ _('Отвечайте по существу вопроса, не уходите в офтоп.') }}</li>
+                <li data-i18n="writing_answers_2">{{ _('Аргументируйте свою точку зрения, приводите примеры.') }}</li>
+                <li data-i18n="writing_answers_3">{{ _('Не публикуйте ответы, содержащие только ссылки — добавьте пояснение.') }}</li>
+                <li data-i18n="writing_answers_4">{{ _('Если ошиблись — исправьте ответ или укажите на ошибку в комментарии.') }}</li>
             </ul>
         </div>
 
         <div class="rules-block">
-            <h2>5. Голосование</h2>
+            <h2>5. <span data-i18n="voting_rules">{{ _('Голосование') }}</span></h2>
             <ul>
-                <li>Голосуйте за полезные и качественные ответы.</li>
-                <li>Не голосуйте за свои собственные вопросы/ответы.</li>
-                <li>Не организуйте накрутку голосов — это приведёт к блокировке.</li>
+                <li data-i18n="voting_rules_1">{{ _('Голосуйте за полезные и качественные ответы.') }}</li>
+                <li data-i18n="voting_rules_2">{{ _('Не голосуйте за свои собственные вопросы/ответы.') }}</li>
+                <li data-i18n="voting_rules_3">{{ _('Не организуйте накрутку голосов — это приведёт к блокировке.') }}</li>
             </ul>
         </div>
 
         <div class="rules-block">
-            <h2>6. Прикрепление файлов</h2>
+            <h2>6. <span data-i18n="file_attachments">{{ _('Прикрепление файлов') }}</span></h2>
             <ul>
-                <li>Разрешены только безопасные форматы: изображения, видео, аудио, документы, архивы.</li>
-                <li>Исполняемые файлы (.exe, .bat, .sh и др.) строго запрещены.</li>
-                <li>Максимальный размер файла — 50 МБ.</li>
-                <li>Не загружайте файлы, содержащие вирусы или вредоносный код.</li>
+                <li data-i18n="file_attachments_1">{{ _('Разрешены только безопасные форматы: изображения, видео, аудио, документы, архивы.') }}</li>
+                <li data-i18n="file_attachments_2">{{ _('Исполняемые файлы (.exe, .bat, .sh и др.) строго запрещены.') }}</li>
+                <li data-i18n="file_attachments_3">{{ _('Максимальный размер файла — 50 МБ.') }}</li>
+                <li data-i18n="file_attachments_4">{{ _('Не загружайте файлы, содержащие вирусы или вредоносный код.') }}</li>
             </ul>
         </div>
 
         <div class="rules-block">
-            <h2>7. Теги</h2>
+            <h2>7. <span data-i18n="tags_rules">{{ _('Теги') }}</span></h2>
             <ul>
-                <li>Используйте только релевантные теги, не злоупотребляйте популярными.</li>
-                <li>Максимум 7 тегов на вопрос.</li>
-                <li>Длина тега — не более 20 символов.</li>
-                <li>Запрещены теги, содержащие нецензурную лексику или оскорбления.</li>
+                <li data-i18n="tags_rules_1">{{ _('Используйте только релевантные теги, не злоупотребляйте популярными.') }}</li>
+                <li data-i18n="tags_rules_2">{{ _('Максимум 7 тегов на вопрос.') }}</li>
+                <li data-i18n="tags_rules_3">{{ _('Длина тега — не более 20 символов.') }}</li>
+                <li data-i18n="tags_rules_4">{{ _('Запрещены теги, содержащие нецензурную лексику или оскорбления.') }}</li>
+                <li data-i18n="tags_rules_5">{{ _('При вводе тегов доступно автодополнение — используйте его для удобства.') }}</li>
             </ul>
         </div>
 
         <div class="rules-block">
-            <h2>8. Профиль</h2>
+            <h2>8. <span data-i18n="profile_rules">{{ _('Профиль') }}</span></h2>
             <ul>
-                <li>Никнейм не должен содержать оскорблений или провокационных слов.</li>
-                <li>Аватарка не должна нарушать законодательство или содержать неприемлемый контент.</li>
-                <li>Email виден только вам — администрация не передаёт его третьим лицам.</li>
-                <li>Вы можете добавить информацию о себе в профиле.</li>
+                <li data-i18n="profile_rules_1">{{ _('Никнейм не должен содержать оскорблений или провокационных слов.') }}</li>
+                <li data-i18n="profile_rules_2">{{ _('Аватарка не должна нарушать законодательство или содержать неприемлемый контент.') }}</li>
+                <li data-i18n="profile_rules_3">{{ _('Email виден только вам — администрация не передаёт его третьим лицам.') }}</li>
+                <li data-i18n="profile_rules_4">{{ _('Вы можете добавить информацию о себе в профиле.') }}</li>
+                <li data-i18n="profile_rules_5">{{ _('Регистрация возможна только с email-адресами в домене .ru.') }}</li>
             </ul>
         </div>
 
         <div class="rules-block">
-            <h2>9. Нарушения и санкции</h2>
-            <p>За нарушение правил применяются следующие меры:</p>
+            <h2>9. <span data-i18n="editing_rules">{{ _('Редактирование') }}</span></h2>
             <ul>
-                <li><strong>Предупреждение</strong> — за первое незначительное нарушение.</li>
-                <li><strong>Временная блокировка (от 3 до 30 дней)</strong> — за повторные или серьёзные нарушения.</li>
-                <li><strong>Перманентная блокировка</strong> — за грубые нарушения (оскорбления, угрозы, спам, вредоносный код).</li>
+                <li data-i18n="editing_rules_1">{{ _('Вы можете редактировать свои вопросы и ответы в любое время.') }}</li>
+                <li data-i18n="editing_rules_2">{{ _('При редактировании нельзя оставлять поля пустыми.') }}</li>
+                <li data-i18n="editing_rules_3">{{ _('История изменений не сохраняется, но администрация может видеть предыдущие версии.') }}</li>
             </ul>
         </div>
 
         <div class="rules-block">
-            <h2>10. Обратная связь</h2>
-            <p>Если вы столкнулись с нарушением правил или у вас есть предложения по улучшению платформы, напишите нам через <a href="{{ url_for('contacts') }}">страницу контактов</a>.</p>
+            <h2>10. <span data-i18n="sanctions">{{ _('Нарушения и санкции') }}</span></h2>
+            <p data-i18n="sanctions_text">{{ _('За нарушение правил применяются следующие меры:') }}</p>
+            <ul>
+                <li><strong data-i18n="warning">{{ _('Предупреждение') }}</strong> — <span data-i18n="sanctions_warning">{{ _('за первое незначительное нарушение.') }}</span></li>
+                <li><strong data-i18n="temporary_ban">{{ _('Временная блокировка (от 3 до 30 дней)') }}</strong> — <span data-i18n="sanctions_temporary">{{ _('за повторные или серьёзные нарушения.') }}</span></li>
+                <li><strong data-i18n="permanent_ban">{{ _('Перманентная блокировка') }}</strong> — <span data-i18n="sanctions_permanent">{{ _('за грубые нарушения (оскорбления, угрозы, спам, вредоносный код).') }}</span></li>
+            </ul>
+        </div>
+
+        <div class="rules-block">
+            <h2>11. <span data-i18n="feedback_rules">{{ _('Обратная связь') }}</span></h2>
+            <p><span data-i18n="feedback_rules_text">{{ _('Если вы столкнулись с нарушением правил или у вас есть предложения по улучшению платформы, напишите нам через') }}</span> <a href="{{ url_for('contacts') }}" data-i18n="contacts">{{ _('страницу контактов') }}</a>.</p>
         </div>
 
         <div class="rules-footer">
-            <p>Последнее обновление: 10 июня 2026 г.</p>
-            <p>CareerVibe оставляет за собой право вносить изменения в правила с уведомлением пользователей.</p>
+            <p data-i18n="last_updated">{{ _('Последнее обновление') }}: 10 <span data-i18n="june">июня</span> 2026 г.</p>
+            <p data-i18n="rules_change_notice">{{ _('CareerVibe оставляет за собой право вносить изменения в правила с уведомлением пользователей.') }}</p>
         </div>
     </div>
 </div>
@@ -116,16 +127,18 @@
     .rules-page {
         max-width: 1000px;
         margin: 40px auto;
-        background: white;
+        background: var(--bg-card);
         border-radius: 24px;
         overflow: hidden;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        box-shadow: var(--shadow-heavy);
+        transition: background 0.3s ease, box-shadow 0.3s ease;
     }
     .rules-hero {
-        background: linear-gradient(90deg, #283f80 0%, #0b9cb5 100%);
+        background: var(--gradient-hero);
         color: white;
         padding: 50px 30px;
         text-align: center;
+        transition: background 0.3s ease;
     }
     .rules-hero h1 {
         font-size: 42px;
@@ -141,8 +154,11 @@
     .rules-block {
         margin-bottom: 35px;
     }
+    .rules-block:last-child {
+        margin-bottom: 0;
+    }
     .rules-block h2 {
-        color: #1a3a6e;
+        color: var(--text-link);
         font-size: 24px;
         margin-bottom: 15px;
         border-left: 5px solid #0b9cb5;
@@ -151,12 +167,12 @@
     .rules-block p {
         font-size: 16px;
         line-height: 1.6;
-        color: #334155;
+        color: var(--text-secondary);
         margin: 12px 0;
     }
     .rules-block ul {
         margin: 12px 0 12px 25px;
-        color: #334155;
+        color: var(--text-secondary);
         line-height: 1.6;
     }
     .rules-block li {
@@ -165,17 +181,92 @@
     .rules-block a {
         color: #0b9cb5;
         text-decoration: none;
+        font-weight: 500;
     }
     .rules-block a:hover {
         text-decoration: underline;
     }
+    .rules-block strong {
+        color: var(--text-primary);
+    }
     .rules-footer {
         margin-top: 30px;
         padding-top: 20px;
-        border-top: 1px solid #e2e8f0;
+        border-top: 1px solid var(--border-light);
         text-align: center;
         font-size: 13px;
-        color: #64748b;
+        color: var(--text-muted);
+        transition: border-color 0.3s ease;
+    }
+    .rules-footer p {
+        margin: 4px 0;
+    }
+
+    @media (max-width: 768px) {
+        .rules-page {
+            margin: 20px 16px;
+            border-radius: 20px;
+        }
+        .rules-hero {
+            padding: 35px 20px;
+        }
+        .rules-hero h1 {
+            font-size: 32px;
+        }
+        .rules-hero p {
+            font-size: 18px;
+        }
+        .rules-content {
+            padding: 25px 20px;
+        }
+        .rules-block h2 {
+            font-size: 20px;
+            padding-left: 16px;
+        }
+        .rules-block p {
+            font-size: 15px;
+        }
+        .rules-block ul {
+            margin-left: 18px;
+        }
+        .rules-block li {
+            font-size: 15px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .rules-page {
+            margin: 12px 10px;
+            border-radius: 16px;
+        }
+        .rules-hero {
+            padding: 25px 16px;
+        }
+        .rules-hero h1 {
+            font-size: 26px;
+        }
+        .rules-hero p {
+            font-size: 16px;
+        }
+        .rules-content {
+            padding: 20px 16px;
+        }
+        .rules-block h2 {
+            font-size: 18px;
+            padding-left: 12px;
+        }
+        .rules-block p {
+            font-size: 14px;
+        }
+        .rules-block ul {
+            margin-left: 14px;
+        }
+        .rules-block li {
+            font-size: 14px;
+        }
+        .rules-footer {
+            font-size: 12px;
+        }
     }
 </style>
 {% endblock %}

@@ -2,42 +2,54 @@
 
 {% block content %}
 <div class="edit-profile-container">
-    <h1>Редактирование профиля</h1>
-    <form method="post" enctype="multipart/form-data" class="edit-form">
+    <h1 data-i18n="edit_profile_title">{{ _('Редактирование профиля') }}</h1>
+    <form method="post" enctype="multipart/form-data" class="edit-form" id="edit-profile-form">
         <div class="form-group">
-            <label>Email (не меняется)</label>
-            <input type="email" value="{{ user.email }}" disabled>
+            <label data-i18n="email_label">{{ _('Email (не меняется)') }}</label>
+            <input type="email" value="{{ user.email }}" disabled class="disabled-input">
+            <small data-i18n="email_hint">{{ _('Email нельзя изменить. Если нужно сменить email, обратитесь в поддержку.') }}</small>
         </div>
 
         <div class="form-group">
-            <label for="nickname">Никнейм (уникальный)</label>
-            <input type="text" id="nickname" name="nickname" value="{{ user.nickname }}" required minlength="3">
-            <small>Минимум 3 символа. Будет виден всем пользователям.</small>
+            <label for="nickname" data-i18n="nickname_label">{{ _('Никнейм (уникальный)') }}</label>
+            <input type="text" id="nickname" name="nickname" value="{{ user.nickname }}" required minlength="3" maxlength="30">
+            <small data-i18n="nickname_hint">{{ _('Минимум 3 символа. Будет виден всем пользователям.') }}</small>
         </div>
 
         <div class="form-group">
-            <label for="bio">О себе</label>
-            <textarea id="bio" name="bio" rows="4" placeholder="Расскажите о себе, вашем опыте, интересах и профессиональных целях...">{{ user.bio or '' }}</textarea>
-            <small>Поддерживается обычный текст. Максимум 500 символов.</small>
+            <label for="bio" data-i18n="bio_label">{{ _('О себе') }}</label>
+            <textarea id="bio" name="bio" rows="4" data-i18n-placeholder="bio_placeholder" maxlength="500">{{ user.bio or '' }}</textarea>
+            <small id="bio-counter"><span data-i18n="bio_hint">{{ _('Осталось символов') }}</span>: 500</small>
         </div>
 
         <div class="form-group">
-            <label>Аватарка</label>
+            <label data-i18n="avatar_label">{{ _('Аватарка') }}</label>
             {% if user.avatar %}
                 <div class="current-avatar">
-                    <img src="{{ url_for('static', filename='avatars/' + user.avatar) }}" alt="avatar" width="80" style="border-radius: 50%;">
+                    <img src="{{ url_for('static', filename='avatars/' + user.avatar) }}" alt="avatar" class="current-avatar-img">
+                    <p class="avatar-filename"><span data-i18n="avatar_current">{{ _('Текущий файл') }}</span>: {{ user.avatar }}</p>
                 </div>
             {% endif %}
-            <input type="file" name="avatar" accept="image/png, image/jpeg, image/jpg, image/gif">
-            <small>Рекомендуемый размер: 200x200 пикселей.</small>
+            <div class="avatar-upload-zone" id="avatar-upload-zone">
+                <div class="avatar-drop-message">
+                    <i class="fas fa-cloud-upload-alt"></i> <span data-i18n="avatar_drop">{{ _('Перетащите изображение сюда или щёлкните для выбора') }}</span>
+                </div>
+                <input type="file" name="avatar" id="avatar-input" accept="image/png, image/jpeg, image/jpg, image/gif, image/webp" style="display: none;">
+                <button type="button" class="btn-small" id="avatar-select-btn" data-i18n="avatar_select">{{ _('Выбрать изображение') }}</button>
+            </div>
+            <div id="avatar-preview-container" style="display: none; margin-top: 12px;">
+                <img id="avatar-preview" alt="preview" style="max-width: 120px; border-radius: 50%; border: 3px solid #0b9cb5;">
+                <button type="button" class="btn-small btn-danger" id="remove-avatar-preview" data-i18n="avatar_remove">{{ _('Убрать') }}</button>
+            </div>
+            <small data-i18n="avatar_hint">{{ _('Рекомендуемый размер: 200x200 пикселей. Поддерживаются PNG, JPG, GIF, WEBP.') }}</small>
         </div>
 
         <div class="form-actions">
             <button type="submit" class="btn btn-primary">
-                <i class="fas fa-save"></i> Сохранить изменения
+                <i class="fas fa-save"></i> <span data-i18n="save_changes">{{ _('Сохранить изменения') }}</span>
             </button>
             <a href="{{ url_for('profile', user_id=user.id) }}" class="btn btn-secondary">
-                <i class="fas fa-times"></i> Отмена
+                <i class="fas fa-times"></i> <span data-i18n="cancel">{{ _('Отмена') }}</span>
             </a>
         </div>
     </form>
@@ -47,13 +59,14 @@
     .edit-profile-container {
         max-width: 700px;
         margin: 100px auto 40px;
-        background: white;
+        background: var(--bg-card);
         padding: 35px;
         border-radius: 20px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        box-shadow: var(--shadow);
+        transition: background 0.3s ease, box-shadow 0.3s ease;
     }
     .edit-profile-container h1 {
-        color: #1a3a6e;
+        color: var(--text-link);
         font-size: 28px;
         margin-bottom: 25px;
         padding-bottom: 15px;
@@ -66,17 +79,19 @@
         display: block;
         font-weight: 600;
         margin-bottom: 8px;
-        color: #1a3a6e;
+        color: var(--text-link);
     }
     .form-group input,
     .form-group textarea {
         width: 100%;
         padding: 12px;
-        border: 1px solid #cbd5e1;
+        border: 1px solid var(--border-color);
         border-radius: 12px;
         font-size: 15px;
-        transition: border-color 0.2s, box-shadow 0.2s;
+        transition: border-color 0.2s, box-shadow 0.2s, background 0.3s, color 0.3s;
         font-family: inherit;
+        background: var(--bg-input);
+        color: var(--text-primary);
     }
     .form-group input:focus,
     .form-group textarea:focus {
@@ -92,21 +107,66 @@
         display: block;
         margin-top: 5px;
         font-size: 12px;
-        color: #64748b;
+        color: var(--text-muted);
     }
+    .disabled-input {
+        background: var(--bg-hover) !important;
+        color: var(--text-muted) !important;
+        cursor: not-allowed;
+    }
+
     .current-avatar {
         margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
     }
-    .current-avatar img {
+    .current-avatar-img {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
         border: 3px solid #0b9cb5;
         padding: 2px;
+        object-fit: cover;
     }
+    .avatar-filename {
+        font-size: 13px;
+        color: var(--text-muted);
+        margin: 0;
+    }
+
+    .avatar-upload-zone {
+        border: 2px dashed var(--border-color);
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        background: var(--bg-hover);
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+    .avatar-upload-zone.drag-over {
+        border-color: #0b9cb5;
+        background: #e0f2fe;
+    }
+    .avatar-drop-message i {
+        font-size: 32px;
+        color: #0b9cb5;
+        margin-bottom: 8px;
+        display: block;
+    }
+    .avatar-drop-message {
+        margin-bottom: 12px;
+        color: var(--text-secondary);
+    }
+
     .form-actions {
         display: flex;
         gap: 15px;
         margin-top: 30px;
         padding-top: 20px;
-        border-top: 1px solid #e2e8f0;
+        border-top: 1px solid var(--border-light);
+        flex-wrap: wrap;
     }
     .btn-primary, .btn-secondary {
         display: inline-flex;
@@ -122,7 +182,7 @@
         transition: transform 0.1s, background 0.2s, box-shadow 0.2s;
     }
     .btn-primary {
-        background: linear-gradient(135deg, #28b8d5, #1689a7);
+        background: var(--gradient-primary);
         color: white;
     }
     .btn-primary:hover {
@@ -130,12 +190,190 @@
         box-shadow: 0 4px 12px rgba(11,156,181,0.3);
     }
     .btn-secondary {
-        background: #e2e8f0;
-        color: #1a3a6e;
+        background: var(--bg-hover);
+        color: var(--text-link);
     }
     .btn-secondary:hover {
         background: #cbd5e1;
         transform: translateY(-2px);
     }
+    .btn-danger {
+        background: var(--toast-error);
+        color: white;
+        border: none;
+        padding: 5px 12px;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .btn-danger:hover {
+        background: #dc2626;
+    }
+    #bio-counter {
+        color: var(--text-muted);
+        font-size: 12px;
+        margin-top: 4px;
+    }
+    #bio-counter.error {
+        color: var(--toast-error);
+    }
+
+    @media (max-width: 768px) {
+        .edit-profile-container {
+            margin: 80px 16px 40px;
+            padding: 20px;
+        }
+        .edit-profile-container h1 {
+            font-size: 24px;
+        }
+        .form-actions {
+            flex-direction: column;
+        }
+        .form-actions .btn {
+            width: 100%;
+            justify-content: center;
+        }
+        .current-avatar {
+            justify-content: center;
+        }
+        .avatar-upload-zone {
+            padding: 15px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .edit-profile-container {
+            padding: 16px;
+            margin: 70px 10px 30px;
+            border-radius: 16px;
+        }
+        .edit-profile-container h1 {
+            font-size: 20px;
+        }
+        .form-group input,
+        .form-group textarea {
+            font-size: 14px;
+            padding: 10px;
+        }
+    }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // ======== СЧЁТЧИК СИМВОЛОВ ДЛЯ BIO ========
+        const bioTextarea = document.getElementById('bio');
+        const bioCounter = document.getElementById('bio-counter');
+        const MAX_BIO_LENGTH = 500;
+
+        if (bioTextarea && bioCounter) {
+            function updateBioCounter() {
+                const remaining = MAX_BIO_LENGTH - bioTextarea.value.length;
+                bioCounter.textContent = __('bio_hint') + ': ' + remaining;
+                if (remaining < 0) {
+                    bioCounter.className = 'error';
+                } else {
+                    bioCounter.className = '';
+                }
+            }
+            bioTextarea.addEventListener('input', updateBioCounter);
+            updateBioCounter();
+        }
+
+        // ======== ПРЕДПРОСМОТР АВАТАРКИ ========
+        const avatarInput = document.getElementById('avatar-input');
+        const avatarPreviewContainer = document.getElementById('avatar-preview-container');
+        const avatarPreview = document.getElementById('avatar-preview');
+        const removeAvatarPreview = document.getElementById('remove-avatar-preview');
+        const avatarUploadZone = document.getElementById('avatar-upload-zone');
+        const avatarSelectBtn = document.getElementById('avatar-select-btn');
+
+        let selectedAvatarFile = null;
+
+        function previewAvatar(file) {
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                avatarPreview.src = e.target.result;
+                avatarPreviewContainer.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+            selectedAvatarFile = file;
+        }
+
+        if (avatarInput) {
+            avatarInput.addEventListener('change', function(e) {
+                if (this.files && this.files[0]) {
+                    previewAvatar(this.files[0]);
+                }
+            });
+        }
+
+        if (avatarSelectBtn) {
+            avatarSelectBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                avatarInput.click();
+            });
+        }
+
+        if (avatarUploadZone) {
+            avatarUploadZone.addEventListener('click', function() {
+                avatarInput.click();
+            });
+
+            avatarUploadZone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('drag-over');
+            });
+
+            avatarUploadZone.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.classList.remove('drag-over');
+            });
+
+            avatarUploadZone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('drag-over');
+                if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                    previewAvatar(e.dataTransfer.files[0]);
+                    const dt = new DataTransfer();
+                    dt.items.add(e.dataTransfer.files[0]);
+                    avatarInput.files = dt.files;
+                }
+            });
+        }
+
+        if (removeAvatarPreview) {
+            removeAvatarPreview.addEventListener('click', function() {
+                avatarPreviewContainer.style.display = 'none';
+                avatarPreview.src = '';
+                selectedAvatarFile = null;
+                avatarInput.value = '';
+            });
+        }
+
+        // ======== ВАЛИДАЦИЯ ФОРМЫ ========
+        const form = document.getElementById('edit-profile-form');
+        const nicknameInput = document.getElementById('nickname');
+
+        form.addEventListener('submit', function(e) {
+            const nickname = nicknameInput.value.trim();
+            if (nickname.length < 3) {
+                e.preventDefault();
+                showToast(__('nickname_too_short'), 'error');
+                nicknameInput.focus();
+                return false;
+            }
+
+            const bio = bioTextarea.value;
+            if (bio.length > MAX_BIO_LENGTH) {
+                e.preventDefault();
+                showToast(__('bio_too_long'), 'error');
+                bioTextarea.focus();
+                return false;
+            }
+
+            return true;
+        });
+    });
+</script>
 {% endblock %}
